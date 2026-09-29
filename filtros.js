@@ -73,9 +73,13 @@ function aplicarFiltrosMultiples() {
 }
 
 // 3. RENDERIZADO DE TARJETAS EN HTML
-// 3. RENDERIZADO DE TARJETAS EN HTML
+// 3. RENDERIZADO DE TARJETAS EN HTML (CON PORTADAS)
 function renderizarCursosResultantes(lista) {
-  const contenedor = document.getElementById('grid-libros');
+  // Intenta encontrar el contenedor por los ID/clases más comunes
+  const contenedor = document.getElementById('grid-libros') || 
+                     document.getElementById('contenedor-tarjetas') || 
+                     document.querySelector('.catalogo-grid');
+
   if (!contenedor) return;
 
   contenedor.innerHTML = '';
@@ -92,17 +96,20 @@ function renderizarCursosResultantes(lista) {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
-    // Lógica para mostrar la imagen de la portada si está definida en BASE_CURSOS
-    const HTMLPortada = curso.portada 
-      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" class="portada-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'portada-placeholder\\' style=\\'background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;\\'><strong>${curso.id || curso.codigo || 'LIBRO'}</strong></div>';" style="width: 100%; height: 220px; object-fit: cover; border-radius: 8px;">`
+    // Genera la etiqueta <img> si la propiedad portada existe
+    const htmlPortada = curso.portada 
+      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" class="portada-img" style="width: 100%; height: 220px; object-fit: cover; border-radius: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+         <div class="portada-placeholder" style="display: none; background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;">
+           <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
+         </div>`
       : `<div class="portada-placeholder" style="background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;">
            <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
          </div>`;
 
     card.innerHTML = `
-      <div class="portada-wrapper">
-        ${HTMLPortada}
-        <span class="badge-formato">${(curso.modalidad || 'PDF').toUpperCase()}</span>
+      <div class="portada-wrapper" style="position: relative;">
+        ${htmlPortada}
+        <span class="badge-formato" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
       </div>
       <div class="libro-info" style="padding: 15px 0;">
         <h4 style="margin: 5px 0;">${curso.nombre || curso.titulo}</h4>
