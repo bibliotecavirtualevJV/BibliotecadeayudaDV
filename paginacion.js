@@ -39,3 +39,21 @@ function renderizarPaginacion(totalRegistros, paginaActual, idContenedor = 'pagi
     contenedor.appendChild(btnSiguiente);
   }
 }
+/**
+ * Renderiza un botón "Ver más" / "Cargar más" que redirige a la página completa de libros.
+ * @param {string} urlCatalogoCompleto - La URL a donde se redirigirá (ej: 'libros.html' o '/catalogo').
+ * @param {string} idContenedor - ID del elemento donde se insertará el botón.
+ */
+function renderizarBotonVerMas(urlCatalogoCompleto = 'libros.html', idContenedor = 'paginacion-bottom') {
+  const contenedor = document.getElementById(idContenedor);
+  if (!contenedor) return;
+
+  contenedor.innerHTML = '';
+
+  const btnVerMas = document.createElement('a');
+  btnVerMas.textContent = 'Ver todos los libros »';
+  btnVerMas.href = urlCatalogoCompleto;
+  btnVerMas.className = 'btn-ver-mas';
+
+  contenedor.appendChild(btnVerMas);
+}
