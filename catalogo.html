@@ -244,30 +244,16 @@
       librosPagina.forEach(libro => {
         const card = document.createElement('div');
         card.className = 'card-libro';
-
-        const portadaHTML = libro.portada 
-          ? `<img src="${libro.portada}" alt="${libro.nombre}" style="width:100%; height:180px; object-fit:cover;">`
-          : `<div class="portada-placeholder"></div>`;
-
-        const enlaceDescarga = (libro.link && libro.link !== '#') ? libro.link : null;
-
         card.innerHTML = `
-          <div style="position: relative; height: 180px; overflow: hidden;">
-            ${portadaHTML}
+          <div class="portada-placeholder">
             <span class="badge-pdf">PDF</span>
           </div>
           <div class="info-libro">
             <h3 class="titulo-libro">${libro.nombre}</h3>
             <p class="autor-libro">Por: ${libro.autor || 'Cátedra Académica'}</p>
-            ${
-              enlaceDescarga 
-                ? `<a href="${enlaceDescarga}" class="btn-descargar" target="_blank" rel="noopener noreferrer">
-                     <i class="fa-solid fa-download"></i> Descargar
-                   </a>`
-                : `<button class="btn-descargar" style="opacity: 0.6; cursor: not-allowed;" disabled>
-                     <i class="fa-solid fa-lock"></i> No disponible
-                   </button>`
-            }
+            <a href="${libro.link || '#'}" class="btn-descargar" target="_blank">
+              <i class="fa-solid fa-download"></i> Descargar
+            </a>
           </div>
         `;
         contenedor.appendChild(card);
@@ -275,9 +261,11 @@
 
       // 4. Renderizar controles de paginación
       if (typeof renderizarPaginacion === 'function') {
-        renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom', 'catalogo.html', false);
+        renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom');
       }
     });
+    // Navegación normal entre páginas dentro del catálogo
+renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom', 'catalogo.html', false);
   </script>
 </body>
 </html>
