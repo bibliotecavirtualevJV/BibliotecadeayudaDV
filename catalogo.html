@@ -221,37 +221,69 @@
   <!-- ARCHIVOS JAVASCRIPT EXTERNOS -->
   <script src="cursos.js"></script>
   <script src="paginacion.js"></script>
-
-  <!-- LÓGICA DE RENDERIZADO -->
+<!-- LÓGICA DE RENDERIZADO CORREGIDA -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Obtener la página desde los parámetros de la URL
+      // 1. Obtener la página desde los parámetros de la URL (?pagina=1, ?pagina=2...)
       const params = new URLSearchParams(window.location.search);
       const paginaActual = parseInt(params.get('pagina')) || 1;
       
-      document.getElementById('lbl-pagina').textContent = `Catálogo - Página ${paginaActual}`;
+      const lblPagina = document.getElementById('lbl-pagina');
+      if (lblPagina) {
+        lblPagina.textContent = `Catálogo - Página ${paginaActual}`;
+      }
+
+      // Validar que BASE_CURSOS exista desde cursos.js
+      if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
+        console.error('BASE_CURSOS no está cargada. Verifica que cursos.js exista.');
+        return;
+      }
 
       // 2. Calcular rango de 50 ítems por página (5x10)
       const limitePorPagina = 50;
       const inicio = (paginaActual - 1) * limitePorPagina;
       const fin = inicio + limitePorPagina;
 
-      // Obtener el fragmento de la lista según la página
+      // Obtener el fragmento de libros
       const librosPagina = BASE_CURSOS.slice(inicio, fin);
       const contenedor = document.getElementById('contenedor-libros');
 
-      // 3. Renderizar las tarjetas
+      if (!contenedor) return;
+      contenedor.innerHTML = '';
+
+      if (librosPagina.length === 0) {
+        contenedor.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">No hay libros disponibles en esta página.</p>';
+        return;
+      }
+
+      // 3. Renderizar las tarjetas con portadas reales
       librosPagina.forEach(libro => {
         const card = document.createElement('div');
         card.className = 'card-libro';
+
+        const titulo = libro.nombre || libro.titulo || 'Sin título';
+        const codigo = libro.id || libro.codigo || 'LIBRO';
+        const formato = libro.modalidad || libro.formato || 'PDF';
+        const enlace = libro.link || libro.enlace || '#';
+
+        const htmlPortada = libro.portada 
+          ? `<img src="${libro.portada}" alt="${titulo}" style="width: 100%; height: 180px; object-fit: contain; background: #e0e0e0; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div style="display: none; height: 180px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold;">
+               ${codigo}
+             </div>`
+          : `<div style="display: flex; height: 180px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold;">
+               ${codigo}
+             </div>`;
+
         card.innerHTML = `
-          <div class="portada-placeholder">
-            <span class="badge-pdf">PDF</span>
+          <div class="portada-placeholder" style="position: relative; height: 180px; overflow: hidden;">
+            ${htmlPortada}
+            <span class="badge-pdf" style="z-index: 2;">${formato.toUpperCase()}</span>
           </div>
           <div class="info-libro">
-            <h3 class="titulo-libro">${libro.nombre}</h3>
+            <h3 class="titulo-libro">${titulo}</h3>
             <p class="autor-libro">Por: ${libro.autor || 'Cátedra Académica'}</p>
-            <a href="${libro.link || '#'}" class="btn-descargar" target="_blank">
+            <a href="${enlace}" class="btn-descargar" target="_blank">
               <i class="fa-solid fa-download"></i> Descargar
             </a>
           </div>
@@ -261,11 +293,11 @@
 
       // 4. Renderizar controles de paginación
       if (typeof renderizarPaginacion === 'function') {
-        renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom');
+        renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom', 'catalogo.html', false);
+      } else if (typeof generarBarraPaginacion === 'function') {
+        generarBarraPaginacion(paginaActual, Math.ceil(BASE_CURSOS.length / limitePorPagina), 'paginacion-bottom');
       }
     });
-    // Navegación normal entre páginas dentro del catálogo
-renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom', 'catalogo.html', false);
   </script>
 </body>
 </html>
