@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo Completo - Biblioteca Digital (USAC)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ESTILOS DEL ENCABEZADO Y BANNER SUPERIOR */
+    .top-header {
+      background-color: #5b2c91;
+      color: #ffffff;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .logo-area-link {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.2s ease;
+    }
+
+    .logo-area-link:hover {
+      opacity: 0.9;
+    }
+
+    .usac-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .usac-title span {
+      color: #f39c12;
+    }
+
+    .fahusac-title {
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .header-right h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .header-right h2 a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .header-right p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #d1c4e9;
+    }
+
+    .main-container {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header-catalogo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* GRID DE 5 COLUMNAS X 10 FILAS (50 LIBROS) */
+    .grid-5x10 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+    }
+
+    /* TARJETA DE LIBRO */
+    .card-libro {
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease;
+    }
+
+    .card-libro:hover {
+      transform: translateY(-5px);
+    }
+
+    .portada-placeholder {
+      background-color: #e0e0e0;
+      height: 180px;
+      position: relative;
+    }
+
+    .badge-pdf {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: #000;
+      color: #fff;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    .info-libro {
+      padding: 15px;
+      text-align: center;
+    }
+
+    .titulo-libro {
+      font-size: 1rem;
+      color: #1a2b4c;
+      margin: 0 0 8px 0;
+      font-weight: bold;
+    }
+
+    .autor-libro {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .btn-descargar {
+      background-color: #5b2c91;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    /* ESTILOS DE PAGINACIÓN */
+    .paginacion-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 40px 0 20px 0;
+    }
+
+    .btn-pagina {
+      padding: 10px 16px;
+      background: #e2e2e2;
+      color: #333;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .btn-pagina.activo,
+    .btn-pagina.active {
+      background: #5b2c91;
+      color: #fff;
+    }
+
+    .btn-siguiente {
+      padding: 10px 20px;
+      background: #f39c12;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO SUPERIOR / BANNER MENÚ (REDIRECCIONA A INDEX.HTML) -->
+  <header class="top-header">
+    <a href="index.html" class="logo-area-link" title="Volver al inicio">
+      <div class="usac-title">USAC <span>TRICENTENARIA</span></div>
+      <div class="fahusac-title">Facultad de Humanidades | Depto. Educación Virtual</div>
+    </a>
+    <div class="header-right">
+      <h2><a href="index.html" title="Volver al inicio"><i class="fa-solid fa-house"></i> Biblioteca Digital</a></h2>
+      <p>Ir a la página principal</p>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="header-catalogo">
+      <h2 style="color: #5b2c91;" id="lbl-pagina">Catálogo de Libros</h2>
+    </div>
+
+    <!-- CONTENEDOR GRID 5X10 -->
+    <div id="contenedor-libros" class="grid-5x10"></div>
+
+    <!-- BARRA DE PAGINACIÓN (UBICADA CORRECTAMENTE EN EL HTML) -->
+    <div id="paginacion-bottom" class="paginacion-container"></div>
+  </main>
+
+  <!-- ARCHIVOS JAVASCRIPT EXTERNOS -->
+  <script src="cursos.js"></script>
+  <script src="paginacion.js"></script>
+
+  <!-- LÓGICA DE RENDERIZADO -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Obtener la página desde los parámetros de la URL
+      const params = new URLSearchParams(window.location.search);
+      const paginaActual = parseInt(params.get('pagina')) || 1;
+      
+      document.getElementById('lbl-pagina').textContent = `Catálogo - Página ${paginaActual}`;
+
+      // 2. Calcular rango de 50 ítems por página (5x10)
+      const limitePorPagina = 50;
+      const inicio = (paginaActual - 1) * limitePorPagina;
+      const fin = inicio + limitePorPagina;
+
+      // Obtener el fragmento de la lista según la página
+      const librosPagina = BASE_CURSOS.slice(inicio, fin);
+      const contenedor = document.getElementById('contenedor-libros');
+
+      // 3. Renderizar las tarjetas
+      librosPagina.forEach(libro => {
+        const card = document.createElement('div');
+        card.className = 'card-libro';
+        card.innerHTML = `
+          <div class="portada-placeholder">
+            <span class="badge-pdf">PDF</span>
+          </div>
+          <div class="info-libro">
+            <h3 class="titulo-libro">${libro.nombre}</h3>
+            <p class="autor-libro">Por: ${libro.autor || 'Cátedra Académica'}</p>
+            <a href="${libro.link || '#'}" class="btn-descargar" target="_blank">
+              <i class="fa-solid fa-download"></i> Descargar
+            </a>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+
+      // 4. Renderizar controles de paginación
+      if (typeof renderizarPaginacion === 'function') {
+        renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom');
+      }
+    });
+    // Navegación normal entre páginas dentro del catálogo
+renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom', 'catalogo.html', false);
+  </script>
+</body>
+</html>

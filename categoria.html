@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categoría - Biblioteca Digital USAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ENCABEZADO SUPERIOR -->
+  <header class="top-header">
+    <div class="logo-area">
+      <div class="usac-title">USAC <span>TRICENTENARIA</span></div>
+      <div class="fahusac-title">Facultad de Humanidades <span>Departamento de Educación Virtual</span></div>
+    </div>
+    <div class="header-right">
+      <h2>Biblioteca Digital</h2>
+      <p>Facultad de Humanidades | Departamento de Educación Virtual</p>
+    </div>
+  </header>
+
+  <!-- NAVEGACIÓN -->
+  <nav class="main-nav">
+    <ul>
+      <li><a href="index.html"><i class="fa-solid fa-house"></i> Volver al Inicio</a></li>
+    </ul>
+  </nav>
+
+  <!-- ENCABEZADO DE LA CATEGORÍA DINÁMICA -->
+  <section class="hero-container" style="padding: 20px; text-align: center;">
+    <h1 id="titulo-categoria">Categoría</h1>
+    <p>Explora y busca el material académico ordenado alfabéticamente.</p>
+  </section>
+
+  <!-- CONTENEDOR BÚSQUEDA Y LISTADO -->
+  <section class="section-container">
+    <div class="search-box" style="margin-bottom: 30px;">
+      <input type="text" id="input-filtro" placeholder="Buscar en esta categoría por título o autor..." onkeyup="filtrarYOrdenar()">
+    </div>
+
+    <div class="portadas-grid" id="grid-categoria">
+      <!-- Los libros pertenecientes a esta categoría se cargarán dinámicamente aquí -->
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <p>© 2026 Biblioteca Virtual - Facultad de Humanidades - USAC</p>
+  </footer>
+
+  <script src="categoria.js"></script>
+</body>
+</html>

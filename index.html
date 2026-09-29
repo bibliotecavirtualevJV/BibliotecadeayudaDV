@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca Digital - Facultad de Humanidades (USAC)</title>
+  <!-- Iconos de FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ENCABEZADO SUPERIOR CON ENLACE AL INICIO -->
+<header class="top-header">
+  <a href="index.html" class="logo-area" style="text-decoration: none; color: inherit;">
+    <div class="usac-title">USAC <span>TRICENTENARIA</span></div>
+    <div class="fahusac-title">Facultad de Humanidades <span>Departamento de Educación Virtual</span></div>
+  </a>
+
+  <div class="header-right">
+    <h2><a href="index.html" style="text-decoration: none; color: inherit;">Biblioteca Digital</a></h2>
+    <p>Facultad de Humanidades | Departamento de Educación Virtual</p>
+  </div>
+
+  <div class="user-account" style="position: relative;">
+    <button id="btn-mi-cuenta" type="button" style="background: transparent; border: none; color: inherit; font-weight: bold; cursor: pointer; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-user-circle" style="font-size: 1.3rem;"></i> 
+      <span id="label-usuario">Mi cuenta</span>
+      <i class="fa-solid fa-chevron-down" style="font-size: 0.8rem;"></i>
+    </button>
+
+    <!-- Menú desplegable al iniciar sesión -->
+    <div id="dropdown-usuario" style="display: none; position: absolute; right: 0; top: 120%; background: white; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border-radius: 8px; padding: 12px; min-width: 180px; z-index: 100;">
+      <p id="user-email-display" style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0; word-break: break-all;"></p>
+        <!-- BOTÓN NUEVO: IR A MI PERFIL -->
+  <button id="btn-ver-perfil" type="button" style="width: 100%; background: #5b2c91; color: white; border: none; padding: 8px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    <i class="fa-solid fa-user"></i> Ver Mi Perfil
+  </button>
+
+  <button id="btn-cerrar-sesion" type="button" style="width: 100%; background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+  </button>
+</div>
+
+  </div>
+</header>
+
+  <!-- NAVEGACIÓN PRINCIPAL -->
+  <nav class="main-nav">
+    <ul>
+      <li><a href="#inicio" class="active"><i class="fa-solid fa-house"></i> Inicio</a></li>
+      <li><a href="#catalogo"><i class="fa-solid fa-book"></i> Catálogo</a></li>
+      <li><a href="#recursos"><i class="fa-solid fa-folder-open"></i> Recursos</a></li>
+      <li><a href="#categorias"><i class="fa-solid fa-layer-group"></i> Colecciones</a></li>
+      <li><a href="#ayuda"><i class="fa-solid fa-circle-question"></i> Ayuda</a></li>
+      <li><a href="#contacto"><i class="fa-solid fa-envelope"></i> Contacto</a></li>
+    </ul>
+  </nav>
+
+  <!-- SECCIÓN HERO / BUSCADOR -->
+  <section id="inicio" class="hero-container">
+    <div class="hero-left">
+      <h1>Aprende, comparte <br><span class="highlight">y Transforma</span></h1>
+      <p>Explora nuestra biblioteca digital y accede a recursos, libros y materiales para tu formación académica.</p>
+    </div>
+    
+    <div class="hero-center">
+      <div class="illustration-box">
+        <i class="fa-solid fa-laptop-code ebook-icon"></i>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="search-box">
+        <h3>¿Qué quieres aprender hoy?</h3>
+        <input type="text" id="input-buscador" placeholder="Buscar por título, autor o tema..." onkeypress="detectarEnter(event)">
+        <button type="button" class="btn-search" onclick="ejecutarBusqueda(event)">Buscar</button>
+        <button type="button" class="btn-advanced" onclick="limpiarBusqueda()"><i class="fa-solid fa-rotate-left"></i> Limpiar búsqueda</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACCESOS RÁPIDOS -->
+  <section id="accesos-rapidos" class="quick-access">
+    <div class="qa-card" data-seccion="catalogo">
+      <div class="qa-icon purple"><i class="fa-solid fa-book-bookmark"></i></div>
+      <div>
+        <h4>Catálogo</h4>
+        <p>Explora todos los libros y recursos</p>
+      </div>
+    </div>
+
+    <div class="qa-card" data-modal="modal-subir">
+      <div class="qa-icon blue"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+      <div>
+        <h4>Subir recurso</h4>
+        <p>Comparte materiales con la comunidad</p>
+      </div>
+    </div>
+
+    <div class="qa-card" data-vista="vista-favoritos">
+      <div class="qa-icon purple"><i class="fa-solid fa-star"></i></div>
+      <div>
+        <h4>Mis favoritos</h4>
+        <p>Recursos guardados para ti</p>
+      </div>
+    </div>
+
+    <div class="qa-card" data-vista="vista-historial">
+      <div class="qa-icon blue"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div>
+        <h4>Historial</h4>
+        <p>Continúa donde lo dejaste</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL FLOTANTE: SUBIR RECURSO -->
+  <div id="modal-subir" class="modal-backdrop vista-oculta">
+    <div class="modal-box modal-form-wide">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-cloud-arrow-up"></i> Sugerir / Subir Recurso Educativo</h3>
+        <button class="btn-cerrar-modal" id="btn-cerrar-modal">&times;</button>
+      </div>
+      <div class="modal-body-form">
+        <iframe 
+          src="https://docs.google.com/forms/d/e/1FAIpQLSfVcrY3SPStlwLHJZGKzc0Ov4VoEYGFjWfCKGikfZG2nvkLcg/viewform?usp=dialog" 
+          width="100%" 
+          height="500" 
+          frameborder="0">
+          Cargando formulario...
+        </iframe>
+      </div>
+    </div>
+  </div>
+  <!-- VISTA: PERFIL DE USUARIO -->
+<section id="vista-perfil" class="section-container" style="display: none; max-width: 900px; margin: 30px auto;">
+  <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+    
+    <!-- ENCABEZADO DEL PERFIL -->
+    <div style="display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; flex-wrap: wrap;">
+      <div style="position: relative; width: 90px; height: 90px;">
+        <img id="profile-avatar" src="https://via.placeholder.com/90" alt="Foto de perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #5b2c91;">
+        <label for="input-avatar" style="position: absolute; bottom: 0; right: 0; background: #5b2c91; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;">
+          <i class="fa-solid fa-camera"></i>
+        </label>
+        <input type="file" id="input-avatar" accept="image/*" style="display: none;">
+      </div>
+
+      <div style="flex-grow: 1;">
+        <h2 id="profile-name" style="margin: 0; color: #333;">Cargando usuario...</h2>
+        <p id="profile-email" style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;"></p>
+      </div>
+
+      <button type="button" class="btn-regresar-catalogo" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Catálogo
+      </button>
+    </div>
+
+    <!-- PESTAÑAS NAVEGABLES DEL PERFIL -->
+    <div style="display: flex; gap: 15px; margin-top: 20px; border-bottom: 1px solid #ddd;">
+      <button id="tab-btn-favoritos" type="button" style="background: none; border: none; padding: 10px 15px; font-weight: bold; font-size: 1rem; color: #5b2c91; border-bottom: 3px solid #5b2c91; cursor: pointer;">
+        <i class="fa-solid fa-star" style="color: #f1c40f;"></i> Mis Favoritos
+      </button>
+      <button id="tab-btn-historial" type="button" style="background: none; border: none; padding: 10px 15px; font-weight: bold; font-size: 1rem; color: #666; cursor: pointer;">
+        <i class="fa-solid fa-clock-rotate-left" style="color: #3498db;"></i> Historial
+      </button>
+    </div>
+
+    <!-- CONTENIDO DE LAS PESTAÑAS -->
+    <div style="margin-top: 20px;">
+      <div id="tab-content-favoritos">
+        <div class="portadas-grid" id="grid-favoritos"></div>
+      </div>
+      <div id="tab-content-historial" style="display: none;">
+        <div class="portadas-grid" id="grid-historial"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+  <!-- FILTROS Y CATÁLOGO -->
+  <section id="recursos" class="section-container">
+    <div class="filters-wrapper" style="display: flex; flex-direction: column; gap: 15px;">
+      <div class="filter-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div>
+          <label for="select-carrera"><strong>Carrera:</strong></label><br>
+          <select id="select-carrera">
+            <option value="todas">Todas las carreras</option>
+            <option value="profesorado-distancia">Profesorado en Ed. a Distancia</option>
+            <option value="profesorado-pedagogia-tic">Profesorado en Pedagogía y TIC</option>
+            <option value="licenciatura-tic">Licenciatura en Educación y TIC</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="select-ciclo"><strong>Ciclo:</strong></label><br>
+          <select id="select-ciclo">
+            <option value="todos">Todos los ciclos</option>
+            <option value="1">Ciclo I</option>
+            <option value="2">Ciclo II</option>
+            <option value="3">Ciclo III</option>
+            <option value="4">Ciclo IV</option>
+            <option value="5">Ciclo V</option>
+            <option value="6">Ciclo VI</option>
+            <option value="7">Ciclo VII</option>
+            <option value="8">Ciclo VIII</option>
+            <option value="9">Ciclo IX</option>
+            <option value="10">Ciclo X</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-row" style="width: 100%;">
+        <div style="width: 100%; max-width: 600px;">
+          <label for="select-asignatura"><strong>Asignatura:</strong></label><br>
+          <select id="select-asignatura" style="width: 100%;">
+            <option value="todas">Todas las asignaturas</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+<div class="filter-row" style="margin-top: 15px;">
+  <button type="button" id="btn-limpiar-filtros" onclick="limpiarFiltros()" style="background-color: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+    <i class="fa-solid fa-rotate-left"></i> Limpiar filtros
+  </button>
+</div>
+  <!-- CATÁLOGO GENERAL DE LIBROS (ÚNICO BLOQUE) -->
+  <section id="catalogo" class="section-container catalogo-grid-section">
+    <h2 class="section-title"><i class="fa-solid fa-book-bookmark"></i> Catálogo General de Libros</h2>
+    
+    <!-- Contenedor donde se renderizan las tarjetas dinámicas -->
+    <div class="portadas-grid" id="grid-libros"></div>
+
+    <!-- BARRA DE PAGINACIÓN DINÁMICA -->
+    <div class="paginacion-container" id="paginacion-principal"></div>
+  </section>
+
+  <!-- SECCIÓN CATEGORÍAS -->
+  <section id="categorias" class="section-container">
+    <h3 class="section-title">••• Explora por categorías •••</h3>
+    <div class="categories-grid">
+      <a href="categoria.html?cat=pedagogia" class="cat-item"><i class="fa-solid fa-graduation-cap"></i><span>Pedagogía</span></a>
+      <a href="categoria.html?cat=tic" class="cat-item"><i class="fa-solid fa-desktop"></i><span>TIC</span></a>
+      <a href="categoria.html?cat=educacion" class="cat-item"><i class="fa-solid fa-book-open"></i><span>Educación</span></a>
+      <a href="categoria.html?cat=investigacion" class="cat-item"><i class="fa-solid fa-magnifying-glass"></i><span>Investigación</span></a>
+      <a href="categoria.html?cat=lenguaje" class="cat-item"><i class="fa-solid fa-comments"></i><span>Lenguaje</span></a>
+      <a href="categoria.html?cat=psicologia" class="cat-item"><i class="fa-solid fa-user-gear"></i><span>Psicología</span></a>
+      <a href="categoria.html?cat=sociales" class="cat-item"><i class="fa-solid fa-users"></i><span>Ciencias Sociales</span></a>
+    </div>
+  </section>
+
+  <!-- BANNER COLABORATIVO -->
+  <section class="collab-banner">
+    <div class="collab-text">
+      <h2>Juntos construimos <span>conocimiento</span></h2>
+    </div>
+    <div class="collab-desc">
+      <p>Esta biblioteca es un espacio colaborativo. Tu aporte enriquece el aprendizaje de toda nuestra comunidad académica.</p>
+    </div>
+  </section>
+
+  <!-- ESTADÍSTICAS -->
+  <section class="stats-bar">
+    <div class="stat-item">
+      <i class="fa-solid fa-book"></i>
+      <div>
+        <h3>+ 2,500</h3>
+        <p>Recursos disponibles</p>
+      </div>
+    </div>
+    <div class="stat-item">
+      <i class="fa-solid fa-users"></i>
+      <div>
+        <h3>+ 1,200</h3>
+        <p>Usuarios activos</p>
+      </div>
+    </div>
+    <div class="stat-item">
+      <i class="fa-solid fa-file-pdf"></i>
+      <div>
+        <h3>+ 300</h3>
+        <p>Libros digitales</p>
+      </div>
+    </div>
+    <div class="stat-item">
+      <i class="fa-solid fa-clock"></i>
+      <div>
+        <h3>24/7</h3>
+        <p>Acceso en línea</p>
+      </div>
+    </div>
+  </section>
+  <!-- SECCIÓN DE AYUDA Y SOPORTE -->
+<section id="ayuda" class="section-container ayuda-section">
+  <h2 class="section-title"><i class="fa-solid fa-circle-question"></i> Centro de Ayuda y Preguntas Frecuentes</h2>
+  <p class="section-subtitle">Encuentra respuestas a las dudas más comunes sobre la consulta y aporte de recursos académicos.</p>
+
+  <!-- Tarjetas de Preguntas Frecuentes (FAQ) -->
+  <div class="faq-grid">
+    <div class="faq-card">
+      <div class="faq-icon"><i class="fa-solid fa-book-open-reader"></i></div>
+      <h4>¿Cómo busco y descargo un libro?</h4>
+      <p>Utiliza la barra de búsqueda en el inicio o navega por las categorías de ciclos. Haz clic en el botón de descarga del recurso para acceder directamente al archivo en Google Drive o TeraBox.</p>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-icon"><i class="fa-solid fa-hand-holding-hand"></i></div>
+      <h4>¿Cómo puedo aportar un nuevo libro?</h4>
+      <p>Presiona el botón verde <strong>"➕ Sugerir un Libro"</strong> ubicado en la parte superior. Completa el formulario de Google con los datos del documento y el enlace de descarga.</p>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-icon"><i class="fa-solid fa-user-check"></i></div>
+      <h4>¿Quién revisa los materiales enviados?</h4>
+      <p>El administrador de la biblioteca revisa los datos y valida los enlaces antes de agregarlos al catálogo público para garantizar la calidad y pertinencia del contenido.</p>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-icon"><i class="fa-solid fa-key"></i></div>
+      <h4>¿Necesito una cuenta para descargar contenido?</h4>
+      <p>No, todos los materiales de la biblioteca son de libre acceso para la comunidad académica de la Facultad de Humanidades sin necesidad de registro previo.</p>
+    </div>
+  </div>
+
+  <!-- Cuadro de Guía / Tutorial Rápido -->
+  <div class="guia-rapida-box">
+    <h3><i class="fa-solid fa-lightbulb"></i> ¿Necesitas orientación adicional?</h3>
+    <p>Si experimentas problemas con un enlace roto o tienes dudas pedagógicas, puedes comunicarte directamente con el Departamento de Educación Virtual o escribir a soporte.</p>
+    <a href="#contacto" class="btn-contacto-ayuda"><i class="fa-solid fa-headset"></i> Ir a Contacto y Soporte</a>
+  </div>
+</section>
+<!-- SECCIÓN DE CONTACTO Y SOPORTE -->
+<section id="contacto" class="section-container contacto-section">
+  <h2 class="section-title"><i class="fa-solid fa-envelope"></i> Contacto y Soporte Técnico</h2>
+  <p class="section-subtitle">¿Tienes alguna duda, encontraste un enlace roto o deseas solicitar asistencia directa?</p>
+
+  <div class="contacto-wrapper">
+    <!-- Información de Contacto Institucional -->
+    <div class="contacto-info">
+      <h3>Información General</h3>
+      <p><i class="fa-solid fa-university"></i> <strong>Facultad de Humanidades</strong> - USAC</p>
+      <p><i class="fa-solid fa-location-dot"></i> Ciudad Universitaria, Zona 12, Guatemala</p>
+      <p><i class="fa-solid fa-clock"></i> Atención: Lunes a Viernes (08:00 - 17:00 hrs)</p>
+      <p><i class="fa-solid fa-headset"></i> Soporte Virtual y Plataformas Educativas</p>
+      
+      <div class="contacto-redes">
+        <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://www.youtube.com/" target="_blank" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="mailto:soporte@fahusac.edu.gt" aria-label="Correo electrónico"><i class="fa-solid fa-envelope"></i></a>
+      </div>
+    </div>
+
+    <!-- Formulario de Mensaje -->
+    <form class="contacto-form" action="https://formspree.io/f/maeyjdag" method="POST">
+      <div class="form-group">
+        <label for="nombre_contacto"><i class="fa-solid fa-user"></i> Nombre completo</label>
+        <input type="text" id="nombre_contacto" name="nombre" placeholder="Ej. Carlos Mendoza" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email_contacto"><i class="fa-solid fa-at"></i> Correo electrónico</label>
+        <input type="email" id="email_contacto" name="email" placeholder="tu_correo@estudiante.usac.edu.gt" required>
+      </div>
+
+      <div class="form-group">
+        <label for="asunto_contacto"><i class="fa-solid fa-tag"></i> Asunto / Motivo</label>
+        <select id="asunto_contacto" name="asunto" required>
+          <option value="" disabled selected>Selecciona una opción...</option>
+          <option value="reporte_enlace">Reportar enlace roto o caído</option>
+          <option value="duda_recurso">Consulta sobre un libro o recurso</option>
+          <option value="sugerencia">Sugerencia de mejora</option>
+          <option value="otro">Otro motivo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="mensaje_contacto"><i class="fa-solid fa-comment-dots"></i> Mensaje</label>
+        <textarea id="mensaje_contacto" name="mensaje" rows="4" placeholder="Escribe tu mensaje o detalle del problema..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-enviar-contacto">
+        <i class="fa-solid fa-paper-plane"></i> Enviar Mensaje
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- PIE DE PÁGINA (FOOTER) -->
+<footer class="main-footer">
+  <p>© 2026 Biblioteca Virtual - Profesorado en Pedagogía y TIC | Facultad de Humanidades - USAC</p>
+</footer>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="footer-usac">
+      <h3>USAC TRICENTENARIA</h3>
+      <p>Facultad de Humanidades | Departamento de Educación Virtual</p>
+    </div>
+    <div class="footer-links">
+      <h4>Enlaces rápidos</h4>
+      <ul>
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#">Catálogo</a></li>
+        <li><a href="#">Recursos</a></li>
+        <li><a href="#">Ayuda</a></li>
+        <li><a href="#">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="footer-social">
+      <h4>Síguenos</h4>
+      <div class="social-icons">
+        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+        <a href="#"><i class="fa-solid fa-globe"></i></a>
+      </div>
+      <p class="copyright">© 2026 Biblioteca Digital - Facultad de Humanidades <br> Universidad de San Carlos de Guatemala</p>
+    </div>
+  </footer>
+<!-- CARGA DE SCRIPTS DE LA BIBLIOTECA -->
+<script src="script.js"></script>
+<script src="cursos.js"></script>
+<script src="filtros.js"></script>
+<script src="paginacion.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof renderizarPaginacion === 'function' && typeof BASE_CURSOS !== 'undefined') {
+      renderizarPaginacion(BASE_CURSOS.length, 1, 'paginacion-principal', 'catalogo.html', true);
+    }
+  });
+</script>
+
+<!-- Carga del Módulo de Autenticación de Firebase -->
+<script type="module" src="auth-ui.js"></script>
+<!-- MODAL DE AUTENTICACIÓN (LOGIN / REGISTRO) -->
+<div id="modal-auth" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 380px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+    <!-- CAMBIA ESTE ID A: btn-cerrar-modal-auth -->
+    <button id="btn-cerrar-modal-auth" type="button" style="position: absolute; top: 10px; right: 15px; border: none; background: transparent; font-size: 1.4rem; cursor: pointer; color: #666;">&times;</button>
+    
+    <h3 id="titulo-modal" style="margin-top: 0; color: #5b2c91; font-size: 1.4rem;">Iniciar Sesión</h3>
+    
+    <form id="form-auth" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+      <input type="email" id="auth-email" placeholder="Correo electrónico" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+      <input type="password" id="auth-password" placeholder="Contraseña" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+      
+      <button type="submit" id="btn-submit-auth" style="background: #5b2c91; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem;">Ingresar</button>
+    </form>
+
+    <div style="margin-top: 15px; text-align: center;">
+      <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">— O entra con —</p>
+      <button type="button" id="btn-auth-google" style="width: 100%; background: #ffffff; color: #757575; border: 1px solid #ccc; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <i class="fa-brands fa-google" style="color: #ea4335; font-size: 1.1rem;"></i> 
+        Continuar con Google
+      </button>
+    </div>
+
+    <p style="font-size: 0.85rem; margin-top: 15px; text-align: center; color: #555;">
+      <span id="texto-toggle">¿No tienes cuenta?</span> 
+      <a href="#" id="link-toggle-auth" style="color: #5b2c91; font-weight: bold; text-decoration: none;">Regístrate aquí</a>
+    </p>
+  </div>
+</div>
+<script type="module" src="perfil.js"></script>
+</body>
+</html>
