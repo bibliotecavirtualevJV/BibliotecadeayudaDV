@@ -182,3 +182,5 @@ function generarBarraPaginacion(paginaActual, totalPaginas, idContenedor = 'pagi
 }
 // Renderiza la paginación en el index.html enviando todos los botones a catalogo.html?pagina=1
 renderizarPaginacion(BASE_CURSOS.length, 1, 'paginacion-principal', 'catalogo.html', true);
+// Muestra el botón para ir al catálogo completo
+renderizarBotonVerMas('libros.html', 'paginacion-bottom');
