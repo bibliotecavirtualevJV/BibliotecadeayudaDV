@@ -1,16 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-  // 1. CARGA DINÁMICA DEL CATÁLOGO DESDE LA BASE DE DATOS
-  // Verifica si existen las variables globales de cursos (ajusta si se llama distinto)
-  const listaCursos = (typeof BASE_CURSOS !== 'undefined') ? BASE_CURSOS : 
-                      (typeof cursos_2 !== 'undefined') ? cursos_2 : 
-                      (typeof cursos !== 'undefined') ? cursos : [];
-
-  if (listaCursos.length > 0) {
-    renderizarCatalogo(listaCursos);
-  }
-
-  // 2. LISTA DE VISTAS INTERCAMBIABLES
+  // Lista de vistas intercambiables
   const TODAS_LAS_VISTAS = ['vista-inicio', 'vista-catalogo', 'vista-favoritos', 'vista-historial'];
 
   // Función para alternar vistas completas
@@ -92,38 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-// FUNCIÓN PARA RENDERIZAR LAS TARJETAS DESDE EL ARREGLO DE CURSOS
-function renderizarCatalogo(cursos) {
-  const contenedor = document.getElementById('catalogo');
-  if (!contenedor) return;
-
-  contenedor.innerHTML = '';
-
-  cursos.forEach(curso => {
-    // Si el objeto del curso tiene la propiedad 'portada', genera la imagen
-    const imagenHTML = curso.portada 
-      ? `<img src="${curso.portada}" alt="${curso.nombre}">` 
-      : `<div class="sin-portada">Sin Portada</div>`;
-
-    const tarjeta = document.createElement('div');
-    tarjeta.className = 'card-libro libro-card';
-    tarjeta.innerHTML = `
-      <div class="portada-container">
-        ${imagenHTML}
-      </div>
-      <div class="card-body">
-        <span class="categoria">${curso.categoria || ''}</span>
-        <h3>${curso.nombre}</h3>
-        <p><strong>Ciclo:</strong> ${curso.ciclo || 'N/A'}</p>
-        <a href="${curso.link}" target="_blank" class="btn-descargar">Descargar</a>
-      </div>
-    `;
-
-    contenedor.appendChild(tarjeta);
-  });
-}
-
-// BÚSQUEDA Y SCROLL DIRECTO AL CATÁLOGO
+// FUNCIÓN PRINCIPAL DE BÚSQUEDA Y SCROLL DIRECTO AL CATÁLOGO
 function ejecutarBusqueda(event) {
   if (event) event.preventDefault();
 
@@ -132,6 +91,7 @@ function ejecutarBusqueda(event) {
 
   const texto = input.value.toLowerCase().trim();
 
+  // 1. Filtrar las tarjetas de libros (.libro-card)
   const tarjetas = document.querySelectorAll('.libro-card');
   tarjetas.forEach(tarjeta => {
     const contenido = tarjeta.innerText.toLowerCase();
@@ -142,6 +102,7 @@ function ejecutarBusqueda(event) {
     }
   });
 
+  // 2. Desplazar la pantalla suavemente hacia la sección #catalogo (que sí existe en tu HTML)
   const seccionCatalogo = document.getElementById('catalogo');
   if (seccionCatalogo) {
     seccionCatalogo.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -168,17 +129,24 @@ function detectarEnter(event) {
     ejecutarBusqueda(event);
   }
 }
-
-// BARRA DE PAGINACIÓN
+/**
+ * Renderiza la barra de paginación en cualquier página.
+ * @param {number} paginaActual - Número de página en la que estás (ej: 1, 2, 3...)
+ * @param {number} totalPaginas - Total de páginas disponibles (ej: 12)
+ * @param {string} idContenedor - ID del div donde se insertará la paginación
+ */
 function generarBarraPaginacion(paginaActual, totalPaginas, idContenedor = 'paginacion-container') {
   const contenedor = document.getElementById(idContenedor);
   if (!contenedor) return;
 
-  contenedor.innerHTML = '';
+  contenedor.innerHTML = ''; // Limpiar previo
 
+  // Si solo hay 1 página, no mostramos nada
   if (totalPaginas <= 1) return;
 
+  // Botón/Enlace para cada número de página
   for (let i = 1; i <= totalPaginas; i++) {
+    // Si hay muchas páginas, simplificar con "..."
     if (totalPaginas > 5 && i > 3 && i < totalPaginas) {
       if (i === 4) {
         const puntos = document.createElement('span');
@@ -193,6 +161,7 @@ function generarBarraPaginacion(paginaActual, totalPaginas, idContenedor = 'pagi
     enlace.textContent = i;
     enlace.className = `btn-pagina ${i === paginaActual ? 'active' : ''}`;
     
+    // Si es la página actual, permanece en la misma vista, de lo contrario navega
     if (i === paginaActual) {
       enlace.href = 'javascript:void(0);';
     } else {
@@ -202,6 +171,7 @@ function generarBarraPaginacion(paginaActual, totalPaginas, idContenedor = 'pagi
     contenedor.appendChild(enlace);
   }
 
+  // Botón "Página siguiente »"
   if (paginaActual < totalPaginas) {
     const btnSiguiente = document.createElement('a');
     btnSiguiente.textContent = 'Página siguiente »';
@@ -210,3 +180,5 @@ function generarBarraPaginacion(paginaActual, totalPaginas, idContenedor = 'pagi
     contenedor.appendChild(btnSiguiente);
   }
 }
+// Renderiza la paginación en el index.html enviando todos los botones a catalogo.html?pagina=1
+renderizarPaginacion(BASE_CURSOS.length, 1, 'paginacion-principal', 'catalogo.html', true);
