@@ -44,34 +44,45 @@ function aplicarFiltrosMultiples() {
   const asignatura = document.getElementById('select-asignatura')?.value || 'todas';
   const texto = (document.getElementById('input-buscador')?.value || '').toLowerCase().trim();
 
-  // Filtrado de la base de datos completa
+  // NUEVO: Leer qué categoría viene en la URL (ej. ?categoria=educacion)
+  const urlParams = new URLSearchParams(window.location.search);
+  const categoriaUrl = (urlParams.get('categoria') || '').toLowerCase().trim();
+
+  // Función para ignorar mayúsculas y tildes al comparar
+  const normalizarTexto = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
   let resultado = BASE_CURSOS.filter(curso => {
     const valCarrera = String(curso.carrera || curso.carrera_id || '');
     const valCiclo = String(curso.ciclo || curso.ciclo_id || '');
     const valAsignatura = String(curso.id || curso.codigo || curso.codigo_curso || curso.asignatura || '');
     const valNombre = String(curso.nombre || curso.titulo || '').toLowerCase();
+    
+    // Extraemos la categoría del curso y la limpiamos de tildes
+    const valCategoria = normalizarTexto(String(curso.categoria || '').toLowerCase());
+    const catUrlLimpia = normalizarTexto(categoriaUrl);
 
     const coincideCarrera = (carrera === 'todas' || valCarrera === carrera);
     const coincideCiclo = (ciclo === 'todos' || valCiclo === String(ciclo));
     const coincideAsignatura = (asignatura === 'todas' || valAsignatura === asignatura);
     const coincideTexto = (texto === '' || valNombre.includes(texto));
+    
+    // NUEVO: Verificamos si pertenece a la categoría seleccionada
+    const coincideCategoria = (catUrlLimpia === '' || valCategoria === catUrlLimpia);
 
-    return coincideCarrera && coincideCiclo && coincideAsignatura && coincideTexto;
+    return coincideCarrera && coincideCiclo && coincideAsignatura && coincideTexto && coincideCategoria;
   });
 
-  const sinFiltroAplicado = (carrera === 'todas' && ciclo === 'todos' && asignatura === 'todas' && texto === '');
-
-  // Muestra solo 6 de vista previa si no se ha aplicado ningún filtro
+  // Si no hay ningún filtro ni búsqueda, mostramos vista previa
+  const sinFiltroAplicado = (carrera === 'todas' && ciclo === 'todos' && asignatura === 'todas' && texto === '' && categoriaUrl === '');
   const librosAMostrar = sinFiltroAplicado ? resultado.slice(0, 6) : resultado;
+
   renderizarCursosResultantes(librosAMostrar);
 
-  // Genera la paginación con el TOTAL de la base si no hay filtro, o sobre el total filtrado
   if (typeof renderizarPaginacion === 'function') {
     const totalParaPaginacion = sinFiltroAplicado ? BASE_CURSOS.length : resultado.length;
     renderizarPaginacion(totalParaPaginacion, 1, 'paginacion-principal', 'catalogo.html', true);
   }
 }
-
 // 3. RENDERIZADO DE TARJETAS EN HTML
 // 3. RENDERIZADO DE TARJETAS EN HTML (SIN CONFLICTOS DE CSS GLOBAL)
 function renderizarCursosResultantes(lista) {
