@@ -44,6 +44,36 @@ function aplicarFiltrosMultiples() {
   const asignatura = document.getElementById('select-asignatura')?.value || 'todas';
   const texto = (document.getElementById('input-buscador')?.value || '').toLowerCase().trim();
 
+  const resultado = BASE_CURSOS.filter(curso => {
+    const valCarrera = String(curso.carrera || curso.carrera_id || '');
+    const valCiclo = String(curso.ciclo || curso.ciclo_id || '');
+    const valAsignatura = String(curso.id || curso.codigo || curso.codigo_curso || curso.asignatura || '');
+    const valNombre = String(curso.nombre || curso.titulo || '').toLowerCase();
+
+    const coincideCarrera = (carrera === 'todas' || valCarrera === carrera);
+    const coincideCiclo = (ciclo === 'todos' || valCiclo === String(ciclo));
+    const coincideAsignatura = (asignatura === 'todas' || valAsignatura === asignatura);
+    const coincideTexto = (texto === '' || valNombre.includes(texto));
+
+    return coincideCarrera && coincideCiclo && coincideAsignatura && coincideTexto;
+  });
+
+  // Llama a la función de renderizado que exista en tu archivo de script/paginación
+  if (typeof renderizarCursosResultantes === 'function') {
+    renderizarCursosResultantes(resultado);
+  } else if (typeof renderizarTarjetas === 'function') {
+    renderizarTarjetas(resultado);
+  } else if (typeof mostrarCursos === 'function') {
+    mostrarCursos(resultado);
+  } else if (typeof renderizarLibros === 'function') {
+    renderizarLibros(resultado);
+  }
+
+  // Actualiza la paginación
+  if (typeof renderizarPaginacion === 'function') {
+    renderizarPaginacion(resultado.length, 1, 'paginacion-principal', 'catalogo.html', true);
+  }
+}
   // Filtrado de la base de datos completa
   let resultado = BASE_CURSOS.filter(curso => {
     const valCarrera = String(curso.carrera || curso.carrera_id || '');
