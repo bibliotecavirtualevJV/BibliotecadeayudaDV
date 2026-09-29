@@ -73,6 +73,7 @@ function aplicarFiltrosMultiples() {
 }
 
 // 3. RENDERIZADO DE TARJETAS EN HTML
+// 3. RENDERIZADO DE TARJETAS EN HTML
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -90,16 +91,22 @@ function renderizarCursosResultantes(lista) {
   lista.forEach(curso => {
     const card = document.createElement('div');
     card.className = 'libro-card';
+
+    // Lógica para mostrar la imagen de la portada si está definida en BASE_CURSOS
+    const HTMLPortada = curso.portada 
+      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" class="portada-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'portada-placeholder\\' style=\\'background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;\\'><strong>${curso.id || curso.codigo || 'LIBRO'}</strong></div>';" style="width: 100%; height: 220px; object-fit: cover; border-radius: 8px;">`
+      : `<div class="portada-placeholder" style="background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;">
+           <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
+         </div>`;
+
     card.innerHTML = `
       <div class="portada-wrapper">
-        <div class="portada-placeholder" style="background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;">
-          <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
-        </div>
+        ${HTMLPortada}
         <span class="badge-formato">${(curso.modalidad || 'PDF').toUpperCase()}</span>
       </div>
       <div class="libro-info" style="padding: 15px 0;">
         <h4 style="margin: 5px 0;">${curso.nombre || curso.titulo}</h4>
-        <p class="autor" style="font-size: 0.85rem; color: #555;">Por: ${curso.autor || 'Cátedra Académica'}</p>
+        <p class="autor" style="font-size: 0.85rem; color: #555;">Categoría: ${curso.categoria || 'General'}</p>
         <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display:inline-block; margin-top:10px; background:#5b2c91; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
           <i class="fa-solid fa-download"></i> Descargar
         </a>
