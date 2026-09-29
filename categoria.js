@@ -1,7 +1,5 @@
-// Variable global para almacenar los libros filtrados
 let librosCategoriaActual = [];
 
-// Función para normalizar texto (quita tildes, espacios extra y pasa a minúsculas)
 function normalizarTexto(str) {
   if (!str) return '';
   return str
@@ -13,53 +11,57 @@ function normalizarTexto(str) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Leer categoría desde la URL (?cat=... o ?categoria=...)
   const params = new URLSearchParams(window.location.search);
   const catParam = params.get('cat') || params.get('categoria') || '';
 
-  // 2. Mostrar título en pantalla
   const tituloEl = document.getElementById('titulo-categoria');
   if (tituloEl) {
     tituloEl.innerText = catParam ? 'Categoría: ' + catParam.toUpperCase() : 'Todas las Categorías';
   }
 
-  // 3. Comprobar que BASE_CURSOS exista (cargada desde cursos.js)
-  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
-    console.error('ERROR: BASE_CURSOS no está definida. Revisa que cursos.js se cargue antes que este script.');
-    const grid = document.getElementById('grid-categoria');
-    if (grid) {
-      grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Error: No se pudo acceder a la base de datos de libros (cursos.js no detectado).</p>';
-    }
-    return;
-  }
-
-  console.log('Total libros en BASE_CURSOS:', BASE_CURSOS.length);
-  console.log('Buscando categoría solicitada:', catParam);
+  // Intentar obtener los datos de BASE_CURSOS
+  const fuente = (typeof BASE_CURSOS !== 'undefined' && Array.isArray(BASE_CURSOS)) ? BASE_CURSOS : [];
 
   const catBuscada = normalizarTexto(catParam);
 
-  // 4. Filtrar libros
-  librosCategoriaActual = BASE_CURSOS.filter(libro => {
-    // Si la URL no trae categoría, mostrar todos los libros
+  // Filtrado de alta tolerancia (busca en categoria, nombre, titulo o id)
+  librosCategoriaActual = fuente.filter(libro => {
     if (!catBuscada) return true;
 
-    // Obtener la categoría del objeto libro (soportando 'categoria', 'cat' o 'seccion')
-    const catLibro = normalizarTexto(libro.categoria || libro.cat || libro.seccion || '');
-    
-    // Comprobar coincidencia exacta o parcial
-    return catLibro.includes(catBuscada) || catBuscada.includes(catLibro);
+    const catLibro = normalizarTexto(libro.categoria || libro.cat || '');
+    const nombreLibro = normalizarTexto(libro.nombre || libro.titulo || '');
+    const idLibro = normalizarTexto(libro.id || libro.codigo || '');
+
+    // Coincidencia directa en categoría
+    if (catLibro.includes(catBuscada) || catBuscada.includes(catLibro)) return true;
+
+    // Reglas de rescate por palabras clave en nombre/título
+    if (catBuscada.includes('educacion') || catBuscada === 'edu') {
+      return catLibro.includes('educa') || nombreLibro.includes('historia') || nombreLibro.includes('didactica') || nombreLibro.includes('pedagogia');
+    }
+    if (catBuscada.includes('tic')) {
+      return catLibro.includes('tic') || nombreLibro.includes('informática') || nombreLibro.includes('tecnología') || idLibro.includes('40-03') || idLibro.includes('40-04');
+    }
+    if (catBuscada.includes('lenguaje')) {
+      return catLibro.includes('lenguaje') || nombreLibro.includes('gramaticales') || nombreLibro.includes('comunicación');
+    }
+    if (catBuscada.includes('investigacion')) {
+      return catLibro.includes('investig') || nombreLibro.includes('técnicas de estudio');
+    }
+    if (catBuscada.includes('sociales')) {
+      return catLibro.includes('social') || nombreLibro.includes('sociología');
+    }
+
+    return false;
   });
 
-  console.log('Libros encontrados para esta categoría:', librosCategoriaActual);
-
-  // 5. Ordenar alfabéticamente por título/nombre
+  // Ordenar alfabéticamente
   librosCategoriaActual.sort((a, b) => {
-    const tituloA = (a.nombre || a.titulo || '').toLowerCase();
-    const tituloB = (b.nombre || b.titulo || '').toLowerCase();
-    return tituloA.localeCompare(tituloB);
+    const tA = (a.nombre || a.titulo || '').toLowerCase();
+    const tB = (b.nombre || b.titulo || '').toLowerCase();
+    return tA.localeCompare(tB);
   });
 
-  // 6. Dibujar las tarjetas en el HTML
   renderizarLibros(librosCategoriaActual);
 });
 
@@ -72,7 +74,7 @@ function renderizarLibros(lista) {
   if (lista.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
-        <p>No se encontraron libros o publicaciones en esta categoría.</p>
+        <p>No se encontraron libros en esta categoría.</p>
       </div>`;
     return;
   }
@@ -109,7 +111,7 @@ function renderizarLibros(lista) {
           <h4 style="margin: 0 0 6px 0; font-size: 0.95rem; color: #222; font-weight: 600; line-height: 1.3;">${titulo}</h4>
           <p style="font-size: 0.8rem; color: #666; margin: 0 0 14px 0;">Categoría: ${categoriaNombre}</p>
         </div>
-        <a href="${enlace}" target="_blank" style="display: block; width: 100%; background: #5b2c91; color: #fff; padding: 9px 0; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">
+        <a href="${enlace}" target="_blank" style="display: block; width: 100%; background: #5b2c91; color: #fff; padding: 99px 0; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; background-color: #5b2c91; padding: 9px 0;">
           <i class="fa-solid fa-download" style="margin-right: 5px;"></i> Descargar
         </a>
       </div>
@@ -131,5 +133,4 @@ function filtrarYOrdenar() {
   });
 
   renderizarLibros(filtrados);
-}
 }
