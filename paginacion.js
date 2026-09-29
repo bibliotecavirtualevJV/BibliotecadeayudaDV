@@ -89,3 +89,5 @@ function renderizarPaginacion(totalRegistros, paginaActual, idContenedor = 'pagi
     contenedor.appendChild(btnSiguiente);
   }
 }
+  }
+}
