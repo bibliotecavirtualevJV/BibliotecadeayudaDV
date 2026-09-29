@@ -13,7 +13,7 @@ function renderizarPaginacion(totalRegistros, paginaActual = 1, idContenedor = '
     contenedor.innerHTML = '';
 
     // Cambiado a 10 (o la cantidad de libros que muestres por fila/página)
-    const limitePorPagina = 10; 
+    const limitePorPagina = 1; 
     const totalPaginas = Math.ceil(totalRegistros / limitePorPagina) || 1;
 
     // Si solo hay 1 página, no se muestran botones
