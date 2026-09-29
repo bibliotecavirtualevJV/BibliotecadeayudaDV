@@ -73,7 +73,7 @@ function aplicarFiltrosMultiples() {
 }
 
 // 3. RENDERIZADO DE TARJETAS EN HTML
-// 3. RENDERIZADO DE TARJETAS EN HTML (AJUSTADO PARA PORTADAS COMPLETAS)
+// 3. RENDERIZADO DE TARJETAS EN HTML (SIN CONFLICTOS DE CSS GLOBAL)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros') || 
                      document.getElementById('contenedor-tarjetas') || 
@@ -94,27 +94,32 @@ function renderizarCursosResultantes(lista) {
   lista.forEach(curso => {
     const card = document.createElement('div');
     card.className = 'libro-card';
+    card.style.cssText = 'background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.08);';
 
-    // Se usa object-fit: contain para mostrar el libro completo sin recortar bordes
+    // Generación de portada limpia
     const htmlPortada = curso.portada 
-      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" class="portada-img" style="width: 100%; height: 260px; object-fit: contain; background-color: #f8f9fa; border-radius: 8px 8px 0 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-         <div class="portada-placeholder" style="display: none; height: 260px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; font-size: 1.2rem;">
-           <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
+      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" style="width: 100%; height: 260px; object-fit: contain; background: #f1f3f5; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+         <div style="display: none; height: 260px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold;">
+           ${curso.id || curso.codigo || 'LIBRO'}
          </div>`
-      : `<div class="portada-placeholder" style="display: flex; height: 260px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; font-size: 1.2rem;">
-           <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
+      : `<div style="display: flex; height: 260px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold;">
+           ${curso.id || curso.codigo || 'LIBRO'}
          </div>`;
 
     card.innerHTML = `
-      <div class="portada-wrapper" style="position: relative; overflow: hidden;">
+      <div style="position: relative; width: 100%; background: #f1f3f5;">
         ${htmlPortada}
-        <span class="badge-formato" style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; text-transform: uppercase;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
+        <span style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.75); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2;">
+          ${(curso.modalidad || 'PDF').toUpperCase()}
+        </span>
       </div>
-      <div class="libro-info" style="padding: 15px; text-align: center;">
-        <h4 style="margin: 5px 0 8px 0; font-size: 1rem; color: #333;">${curso.nombre || curso.titulo}</h4>
-        <p class="autor" style="font-size: 0.82rem; color: #666; margin-bottom: 12px;">Categoría: ${curso.categoria || 'General'}</p>
-        <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display:block; width: 100%; background:#5b2c91; color:#fff; padding:8px 0; border-radius:6px; text-decoration:none; font-weight: 500;">
-          <i class="fa-solid fa-download"></i> Descargar
+      <div style="padding: 16px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between;">
+        <div>
+          <h4 style="margin: 0 0 6px 0; font-size: 0.95rem; color: #222; font-weight: 600; line-height: 1.3;">${curso.nombre || curso.titulo}</h4>
+          <p style="font-size: 0.8rem; color: #666; margin: 0 0 14px 0;">Categoría: ${curso.categoria || 'General'}</p>
+        </div>
+        <a href="${curso.link || '#'}" target="_blank" style="display: block; width: 100%; background: #5b2c91; color: #fff; padding: 9px 0; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">
+          <i class="fa-solid fa-download" style="margin-right: 5px;"></i> Descargar
         </a>
       </div>
     `;
