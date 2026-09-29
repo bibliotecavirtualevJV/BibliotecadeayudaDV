@@ -73,9 +73,8 @@ function aplicarFiltrosMultiples() {
 }
 
 // 3. RENDERIZADO DE TARJETAS EN HTML
-// 3. RENDERIZADO DE TARJETAS EN HTML (CON PORTADAS)
+// 3. RENDERIZADO DE TARJETAS EN HTML (AJUSTADO PARA PORTADAS COMPLETAS)
 function renderizarCursosResultantes(lista) {
-  // Intenta encontrar el contenedor por los ID/clases más comunes
   const contenedor = document.getElementById('grid-libros') || 
                      document.getElementById('contenedor-tarjetas') || 
                      document.querySelector('.catalogo-grid');
@@ -96,25 +95,25 @@ function renderizarCursosResultantes(lista) {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
-    // Genera la etiqueta <img> si la propiedad portada existe
+    // Se usa object-fit: contain para mostrar el libro completo sin recortar bordes
     const htmlPortada = curso.portada 
-      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" class="portada-img" style="width: 100%; height: 220px; object-fit: cover; border-radius: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-         <div class="portada-placeholder" style="display: none; background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;">
+      ? `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo}" class="portada-img" style="width: 100%; height: 260px; object-fit: contain; background-color: #f8f9fa; border-radius: 8px 8px 0 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+         <div class="portada-placeholder" style="display: none; height: 260px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; font-size: 1.2rem;">
            <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
          </div>`
-      : `<div class="portada-placeholder" style="background: #5b2c91; color: #fff; padding: 25px 15px; text-align: center; border-radius: 8px;">
+      : `<div class="portada-placeholder" style="display: flex; height: 260px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; font-size: 1.2rem;">
            <strong>${curso.id || curso.codigo || 'LIBRO'}</strong>
          </div>`;
 
     card.innerHTML = `
-      <div class="portada-wrapper" style="position: relative;">
+      <div class="portada-wrapper" style="position: relative; overflow: hidden;">
         ${htmlPortada}
-        <span class="badge-formato" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
+        <span class="badge-formato" style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; text-transform: uppercase;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
       </div>
-      <div class="libro-info" style="padding: 15px 0;">
-        <h4 style="margin: 5px 0;">${curso.nombre || curso.titulo}</h4>
-        <p class="autor" style="font-size: 0.85rem; color: #555;">Categoría: ${curso.categoria || 'General'}</p>
-        <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display:inline-block; margin-top:10px; background:#5b2c91; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
+      <div class="libro-info" style="padding: 15px; text-align: center;">
+        <h4 style="margin: 5px 0 8px 0; font-size: 1rem; color: #333;">${curso.nombre || curso.titulo}</h4>
+        <p class="autor" style="font-size: 0.82rem; color: #666; margin-bottom: 12px;">Categoría: ${curso.categoria || 'General'}</p>
+        <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display:block; width: 100%; background:#5b2c91; color:#fff; padding:8px 0; border-radius:6px; text-decoration:none; font-weight: 500;">
           <i class="fa-solid fa-download"></i> Descargar
         </a>
       </div>
