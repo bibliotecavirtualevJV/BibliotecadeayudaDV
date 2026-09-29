@@ -4,7 +4,7 @@ const BASE_CURSOS = [
   // ==========================================
   // Ciclo I
   { id: "40-01", nombre: "Estudios gramaticales", carrera: "profesorado-distancia", ciclo: "1", modalidad: "b-learning", jornada: "vespertina", categoria: "Lenguaje" },
-  { id: "40-02", nombre: "Historia de Guatemala", carrera: "profesorado-distancia", ciclo: "1", modalidad: "b-learning", jornada: "vespertina", categoria: "Educación" },
+  {  { id: "40-02", nombre: "Historia de Guatemala", carrera: "profesorado-distancia", ciclo: "1", modalidad: "b-learning", jornada: "vespertina", categoria: "Educación", link: "https://1024terabox.com/s/1-CmWaXBWXoq6qoB1n61BcQ",portada: "img/patriacriollo.png" },
   { id: "40-03", nombre: "Alfabetización informacional y mediática", carrera: "profesorado-distancia", ciclo: "1", modalidad: "b-learning", jornada: "vespertina", categoria: "TIC" },
   { id: "40-04", nombre: "Lógica aplicada a la informática", carrera: "profesorado-distancia", ciclo: "1", modalidad: "b-learning", jornada: "vespertina", categoria: "TIC" },
   { id: "40-05", nombre: "Técnicas de estudio e investigación", carrera: "profesorado-distancia", ciclo: "1", modalidad: "b-learning", jornada: "vespertina", categoria: "Investigación" },
