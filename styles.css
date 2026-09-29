@@ -917,6 +917,29 @@ body.en-vista-perfil .collab-banner,
 body.en-vista-perfil .stats-bar {
   display: none !important;
 }
+.btn-ver-mas {
+  display: inline-block;
+  background-color: #5b288e;
+  color: #ffffff;
+  padding: 12px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px auto;
+  transition: background-color 0.2s ease;
+}
+
+.btn-ver-mas:hover {
+  background-color: #431c6a;
+  color: #ffffff;
+}
+
+/* Centrar en el contenedor */
+#paginacion-bottom {
+  text-align: center;
+  width: 100%;
+}
 
 /* Mostrar la sección de perfil únicamente con la clase activa */
 body.en-vista-perfil #vista-perfil {
