@@ -186,3 +186,45 @@ renderizarPaginacion(BASE_CURSOS.length, 1, 'paginacion-principal', 'catalogo.ht
 renderizarPaginacion(BASE_CURSOS.length, 1, 'paginacion-principal', 'catalogo.html', true);
 // Muestra el botón para ir al catálogo completo
 renderizarBotonVerMas('libros.html', 'paginacion-bottom');
+// 1. FUNCIÓN PARA GENERAR LAS TARJETAS DINÁMICAMENTE DESDE TU BASE DE DATOS
+function renderizarCatalogo(cursos) {
+  const contenedor = document.getElementById('catalogo'); // O el ID de tu contenedor principal
+  if (!contenedor) return;
+
+  // Limpiamos el contenedor antes de renderizar
+  contenedor.innerHTML = '';
+
+  cursos.forEach(curso => {
+    // Si el curso tiene portada en cursos_2.js la usa; si no, pone un marcador o div sin imagen
+    const imagenHTML = curso.portada 
+      ? `<img src="${curso.portada}" alt="${curso.nombre}">` 
+      : `<div class="sin-portada">Sin Portada</div>`;
+
+    // Creamos la estructura HTML de la tarjeta
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'card-libro libro-card';
+    tarjeta.innerHTML = `
+      <div class="portada-container">
+        ${imagenHTML}
+      </div>
+      <div class="card-body">
+        <span class="categoria">${curso.categoria || ''}</span>
+        <h3>${curso.nombre}</h3>
+        <p><strong>Ciclo:</strong> ${curso.ciclo || 'N/A'}</p>
+        <a href="${curso.link}" target="_blank" class="btn-descargar">Descargar</a>
+      </div>
+    `;
+
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+// 2. EJECUTAR EL RENDERIZADO CUANDO EL DOCUMENTO ESTÉ LISTO
+document.addEventListener('DOMContentLoaded', function () {
+  // Verificamos si existe el arreglo de cursos (cursos_2.js o BASE_CURSOS)
+  if (typeof BASE_CURSOS !== 'undefined') {
+    renderizarCatalogo(BASE_CURSOS);
+  } else if (typeof cursos !== 'undefined') {
+    renderizarCatalogo(cursos);
+  }
+});
