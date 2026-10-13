@@ -78,6 +78,7 @@ const BASE_CURSOS = [
   { id: "29-18", nombre: "Estrategias de evaluación I", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "Pedagogía", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/evaluacion_1_29.png" },
   { id: "29-19", nombre: "Bibliotecas digitales", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "TIC", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/bibliotecas_digitales_29.png" },
   { id: "29-20", nombre: "Semiologia de la imagen", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "TIC", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/semiologia_imagen_29.png" },
+  { id: "29-20", nombre: "Semiótica de lo visual", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "TIC", link: "https://1024terabox.com/s/1EDu9G5kT1zMIbolG_qRyBg", portada: "Semiótica de lo visual.png" },
 
   // Ciclo V
   { id: "29-21", nombre: "Mediación pedagógica y TIC", carrera: "profesorado-pedagogia-tic", ciclo: "5", modalidad: "b-learning", jornada: "vespertina", categoria: "Pedagogía", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/mediacion_pedagogica.png" },
