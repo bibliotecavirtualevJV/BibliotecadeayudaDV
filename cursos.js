@@ -74,6 +74,7 @@ const BASE_CURSOS = [
 
   // Ciclo IV
   { id: "29-16", nombre: "Centros de aprendizaje integrados al currículo", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "Pedagogía", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/centros_aprendizaje_29.png" },
+  { id: "29-16", nombre: "Centro de Recursos para el Aprendizaje CRA", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "Gestión de Recursos Educativos", link: "https://1024terabox.com/s/19HWN57YbRc7vi9IsyGSyUQ", portada: "Centro de Recursos para el Aprendizaje CRA" },
   { id: "29-17", nombre: "Didáctica y multimedia", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "Pedagogía", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/didactica_multimedia.png" },
   { id: "29-18", nombre: "Estrategias de evaluación I", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "Pedagogía", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/evaluacion_1_29.png" },
   { id: "29-19", nombre: "Bibliotecas digitales", carrera: "profesorado-pedagogia-tic", ciclo: "4", modalidad: "b-learning", jornada: "vespertina", categoria: "TIC", link: "https://terabox.com/s/AQUI_TU_ENLACE", portada: "img/bibliotecas_digitales_29.png" },
