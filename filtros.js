@@ -71,7 +71,7 @@ function aplicarFiltrosMultiples() {
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS (CON SOPORTE DE GOOGLE DRIVE Y NOMBRE DEL LIBRO)
+// 3. RENDERIZADO DE TARJETAS (MUESTRA EL TÍTULO DEL LIBRO ESPECÍFICO)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -99,17 +99,18 @@ function renderizarCursosResultantes(lista) {
       }
     }
 
-    // Tomamos el nombre específico del libro (o el título del libro enviado)
-    const tituloLibroEspecifico = curso.nombreLibro || curso.tituloLibro || curso.nombre || curso.titulo || 'LIBRO';
+    // Aquí priorizamos el nombre específico del libro (ej. "Patria del Criollo"), 
+    // y si no viene, usamos el nombre del curso o un texto por defecto.
+    const tituloDelLibro = curso.nombreLibro || curso.tituloLibro || curso.nombreLibroEspecifico || curso.nombre || curso.titulo || 'Recurso Académico';
+    const infoCursoAsociado = curso.id ? `[${curso.id}] ${curso.nombre || ''}` : (curso.nombre || '');
 
-    // Estructura visual: Si la imagen carga, se muestra limpia. Si falla, muestra el título del libro como respaldo.
     let contenidoPortada = '';
     if (imgSrc && imgSrc.trim() !== '') {
       contenidoPortada = `
         <img src="${imgSrc}" alt="Portada" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" onerror="this.style.display='none';">
       `;
     } else {
-      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${tituloLibroEspecifico}</strong>`;
+      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${tituloDelLibro}</strong>`;
     }
 
     card.innerHTML = `
@@ -120,7 +121,8 @@ function renderizarCursosResultantes(lista) {
         </div>
       </div>
       <div class="libro-info" style="padding: 15px 0;">
-        <h4 style="margin: 5px 0; font-size: 1rem; color: #1a2b4c;">${tituloLibroEspecifico}</h4>
+        <h4 style="margin: 5px 0; font-size: 1rem; color: #1a2b4c;">${tituloDelLibro}</h4>
+        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 4px;"><strong>Curso:</strong> ${infoCursoAsociado}</p>
         <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 12px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; background:#5b2c91; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight: bold;">
           <i class="fa-solid fa-download"></i> Descargar
@@ -130,7 +132,6 @@ function renderizarCursosResultantes(lista) {
     contenedor.appendChild(card);
   });
 }
-
 // 4. RESTABLECER FILTROS
 function limpiarFiltros() {
   const selectCarrera = document.getElementById('select-carrera');
