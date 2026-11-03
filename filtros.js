@@ -6,7 +6,6 @@ function actualizarOpcionesAsignatura() {
 
   if (!selectAsignatura || typeof BASE_CURSOS === 'undefined') return;
 
-  // Filtrar asignaturas compatibles con lectura flexible de llaves
   const asignaturasCompatibles = BASE_CURSOS.filter(curso => {
     const valCarrera = String(curso.carrera || curso.carrera_id || '');
     const valCiclo = String(curso.ciclo || curso.ciclo_id || '');
@@ -35,16 +34,18 @@ function actualizarOpcionesAsignatura() {
   }
 }
 
-// 2. FILTRADO PRINCIPAL Y MANEJO DE VISTA PREVIA
+// 2. FILTRADO PRINCIPAL
 function aplicarFiltrosMultiples() {
-  if (typeof BASE_CURSOS === 'undefined') return;
+  if (typeof BASE_CURSOS === 'undefined') {
+    console.error("BASE_CURSOS no está definido. Revisa que cursos.js cargue antes.");
+    return;
+  }
 
   const carrera = document.getElementById('select-carrera')?.value || 'todas';
   const ciclo = document.getElementById('select-ciclo')?.value || 'todos';
   const asignatura = document.getElementById('select-asignatura')?.value || 'todas';
   const texto = (document.getElementById('input-buscador')?.value || '').toLowerCase().trim();
 
-  // Filtrado de la base de datos completa
   let resultado = BASE_CURSOS.filter(curso => {
     const valCarrera = String(curso.carrera || curso.carrera_id || '');
     const valCiclo = String(curso.ciclo || curso.ciclo_id || '');
@@ -60,26 +61,24 @@ function aplicarFiltrosMultiples() {
   });
 
   const sinFiltroAplicado = (carrera === 'todas' && ciclo === 'todos' && asignatura === 'todas' && texto === '');
-
-  // Muestra solo 6 de vista previa si no se ha aplicado ningún filtro
   const librosAMostrar = sinFiltroAplicado ? resultado.slice(0, 6) : resultado;
+
   renderizarCursosResultantes(librosAMostrar);
 
-  // Genera la paginación con el TOTAL de la base si no hay filtro, o sobre el total filtrado
   if (typeof renderizarPaginacion === 'function') {
     const totalParaPaginacion = sinFiltroAplicado ? BASE_CURSOS.length : resultado.length;
     renderizarPaginacion(totalParaPaginacion, 1, 'paginacion-principal', 'catalogo.html', true);
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS EN HTML (MODIFICADO PARA PORTADAS E IMÁGENES)
+// 3. RENDERIZADO DE TARJETAS
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
 
   contenedor.innerHTML = '';
 
-  if (lista.length === 0) {
+  if (!lista || lista.length === 0) {
     contenedor.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
         <p>No se encontraron publicaciones o recursos para este filtro.</p>
@@ -91,7 +90,6 @@ function renderizarCursosResultantes(lista) {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
-    // Validación inteligente para mostrar imagen de portada o texto de respaldo
     let contenidoPortada = '';
     if (curso.portada && curso.portada.trim() !== '') {
       contenidoPortada = `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo || 'Libro'}" style="width: 100%; height: 100%; object-fit: cover;">`;
@@ -118,7 +116,7 @@ function renderizarCursosResultantes(lista) {
   });
 }
 
-// 4. RESTABLECER FILTROS A ESTADO INICIAL
+// 4. RESTABLECER FILTROS
 function limpiarFiltros() {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -135,7 +133,7 @@ function limpiarFiltros() {
   aplicarFiltrosMultiples();
 }
 
-// 5. ESCUCHADORES DE EVENTOS
+// 5. INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -159,8 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
     selectAsignatura.addEventListener('change', aplicarFiltrosMultiples);
   }
 
-  // Carga inicial
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
 });
 ```[cite: 11]
+
+
