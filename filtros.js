@@ -160,6 +160,5 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
 });
-```[cite: 11]
 
 
