@@ -71,7 +71,7 @@ function aplicarFiltrosMultiples() {
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS
+// 3. RENDERIZADO DE TARJETAS (CON SOPORTE DE GOOGLE DRIVE Y RESPALDO)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -90,18 +90,33 @@ function renderizarCursosResultantes(lista) {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
+    // Procesar enlace de Google Drive automáticamente si viene del formulario
+    let imgSrc = curso.portada || '';
+    if (imgSrc.includes('drive.google.com')) {
+      const matchId = imgSrc.match(/[-\w]{25,}/);
+      if (matchId) {
+        imgSrc = `https://lh3.googleusercontent.com/d/${matchId[0]}`;
+      }
+    }
+
+    // Estructura visual de la portada con respaldo automático
     let contenidoPortada = '';
-    if (curso.portada && curso.portada.trim() !== '') {
-      contenidoPortada = `<img src="${curso.portada}" alt="${curso.nombre || curso.titulo || 'Libro'}" style="width: 100%; height: 100%; object-fit: cover;">`;
+    if (imgSrc && imgSrc.trim() !== '') {
+      contenidoPortada = `
+        <img src="${imgSrc}" alt="Portada" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" onerror="this.style.display='none';">
+        <div style="position: relative; z-index: 1; padding: 15px; font-weight: bold; font-size: 0.95rem; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+          ${curso.nombre || curso.titulo || 'LIBRO'}
+        </div>
+      `;
     } else {
-      contenidoPortada = `<strong style="padding: 10px; font-size: 0.9rem;">${curso.id || curso.codigo || 'LIBRO'}</strong>`;
+      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${curso.nombre || curso.titulo || 'LIBRO'}</strong>`;
     }
 
     card.innerHTML = `
       <div class="portada-wrapper">
-        <div class="portada-placeholder" style="background: #5b2c91; color: #fff; height: 180px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; border-radius: 8px; position: relative;">
+        <div class="portada-placeholder" style="background: linear-gradient(135deg, #5b2c91, #3b1d59); color: #fff; height: 180px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; border-radius: 8px; position: relative;">
           ${contenidoPortada}
-          <span class="badge-formato" style="position: absolute; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
+          <span class="badge-formato" style="position: absolute; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; z-index: 2;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
         </div>
       </div>
       <div class="libro-info" style="padding: 15px 0;">
@@ -160,5 +175,4 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
 });
-
 
