@@ -71,7 +71,7 @@ function aplicarFiltrosMultiples() {
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS (CON SOPORTE DE GOOGLE DRIVE Y RESPALDO)
+// 3. RENDERIZADO DE TARJETAS (CON SOPORTE DE GOOGLE DRIVE Y NOMBRE DEL LIBRO)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -99,17 +99,17 @@ function renderizarCursosResultantes(lista) {
       }
     }
 
-    // Estructura visual de la portada con respaldo automático
+    // Tomamos el nombre específico del libro (o el título del libro enviado)
+    const tituloLibroEspecifico = curso.nombreLibro || curso.tituloLibro || curso.nombre || curso.titulo || 'LIBRO';
+
+    // Estructura visual: Si la imagen carga, se muestra limpia. Si falla, muestra el título del libro como respaldo.
     let contenidoPortada = '';
     if (imgSrc && imgSrc.trim() !== '') {
       contenidoPortada = `
         <img src="${imgSrc}" alt="Portada" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" onerror="this.style.display='none';">
-        <div style="position: relative; z-index: 1; padding: 15px; font-weight: bold; font-size: 0.95rem; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
-          ${curso.nombre || curso.titulo || 'LIBRO'}
-        </div>
       `;
     } else {
-      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${curso.nombre || curso.titulo || 'LIBRO'}</strong>`;
+      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${tituloLibroEspecifico}</strong>`;
     }
 
     card.innerHTML = `
@@ -120,7 +120,7 @@ function renderizarCursosResultantes(lista) {
         </div>
       </div>
       <div class="libro-info" style="padding: 15px 0;">
-        <h4 style="margin: 5px 0; font-size: 1rem; color: #1a2b4c;">${curso.nombre || curso.titulo || 'Sin título'}</h4>
+        <h4 style="margin: 5px 0; font-size: 1rem; color: #1a2b4c;">${tituloLibroEspecifico}</h4>
         <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 12px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; background:#5b2c91; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight: bold;">
           <i class="fa-solid fa-download"></i> Descargar
@@ -175,4 +175,3 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
 });
-
