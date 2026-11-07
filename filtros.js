@@ -71,7 +71,7 @@ function aplicarFiltrosMultiples() {
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS (Con botones apilados: Me gusta arriba, Descargar abajo)
+// 3. RENDERIZADO DE TARJETAS (Con persistencia segura de favoritos)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -84,6 +84,12 @@ function renderizarCursosResultantes(lista) {
         <p>No se encontraron publicaciones o recursos para este filtro.</p>
       </div>`;
     return;
+  }
+
+  // Obtener favoritos actuales del usuario autenticado de forma segura
+  let favoritosIds = [];
+  if (typeof usuarioActual !== 'undefined' && usuarioActual && usuarioActual.uid) {
+    favoritosIds = JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || [];
   }
 
   lista.forEach(curso => {
@@ -102,9 +108,8 @@ function renderizarCursosResultantes(lista) {
     const tituloLibro = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso Académico';
     const cursoAsociado = curso.nombre || '';
 
-    const esFav = (typeof usuarioActual !== 'undefined' && usuarioActual) 
-      ? (JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || []).includes(idRecurso)
-      : false;
+    // Verificar si este recurso está en la lista de favoritos del almacenamiento local
+    const esFav = favoritosIds.includes(idRecurso);
 
     let contenidoPortada = '';
     if (imgSrc && imgSrc.trim() !== '') {
@@ -127,7 +132,7 @@ function renderizarCursosResultantes(lista) {
         <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 2px;"><strong>Curso:</strong> ${cursoAsociado}</p>
         <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         
-        <!-- BOTONES APILADOS: Me gusta arriba, Descargar abajo -->
+        <!-- BOTONES APILADOS -->
         <div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
           <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="width: 100%; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i class="fa-solid fa-star"></i> ${esFav ? 'Guardado' : 'Me gusta'}
