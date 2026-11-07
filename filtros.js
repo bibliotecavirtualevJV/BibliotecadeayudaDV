@@ -73,7 +73,7 @@ function obtenerIdCurso(curso) {
   return String(curso.id || curso.codigo || curso.codigo_curso || curso.tituloLibro || curso.nombreLibro || '').trim();
 }
 
-// 4. RENDERIZADO DE TARJETAS
+// 4. RENDERIZADO DE TARJETAS (Con botones APILADOS)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -127,17 +127,18 @@ function renderizarCursosResultantes(lista) {
           <span class="badge-formato" style="position: absolute; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; z-index: 2;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
         </div>
       </div>
-      <div class="libro-info" style="padding: 15px 0;">
+      <div class="libro-info" style="padding: 15px 0; display: flex; flex-direction: column; gap: 8px;">
         <h4 style="margin: 5px 0; font-size: 1.05rem; color: #1a2b4c; font-weight: bold;">${tituloLibro}</h4>
-        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 4px;"><strong>Curso:</strong> ${cursoAsociado}</p>
-        <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 12px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
+        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 2px;"><strong>Curso:</strong> ${cursoAsociado}</p>
+        <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         
-        <div style="display: flex; gap: 8px;">
-          <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="flex: 1; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px;">
+        <!-- BOTONES APILADOS: Me gusta arriba, Descargar abajo -->
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
+          <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="width: 100%; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i class="fa-solid fa-star"></i> ${esFav ? 'Guardado' : 'Me gusta'}
           </button>
           
-          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; background:#5b2c91; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight: bold;">
+          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background:#5b2c91; color:#fff; padding:8px; border-radius:6px; text-decoration:none; font-weight: bold; box-sizing: border-box;">
             <i class="fa-solid fa-download"></i> Descargar
           </a>
         </div>
@@ -216,7 +217,7 @@ window.registrarEnHistorial = function(idRecurso) {
   if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
 };
 
-// 8. RENDERIZAR FAVORITOS EN EL PERFIL (ESPERANDO A GOOGLE SHEETS)
+// 8. RENDERIZAR FAVORITOS EN EL PERFIL (Con botones APILADOS)
 window.renderizarFavoritos = function() {
   const contenedor = document.getElementById('tab-content-favoritos');
   if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
@@ -228,10 +229,9 @@ window.renderizarFavoritos = function() {
     return;
   }
 
-  // Esperar a que BASE_CURSOS esté lleno antes de buscar
   if (typeof BASE_CURSOS === 'undefined' || BASE_CURSOS.length === 0) {
     contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Cargando tus favoritos...</p>`;
-    setTimeout(window.renderizarFavoritos, 500); // Reintenta en medio segundo
+    setTimeout(window.renderizarFavoritos, 500);
     return;
   }
 
@@ -241,7 +241,7 @@ window.renderizarFavoritos = function() {
   });
 
   if (recursosFavoritos.length === 0) {
-    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">No se encontraron los detalles de los recursos favoritos. Es posible que el libro haya sido eliminado de la biblioteca.</p>`;
+    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">No se encontraron los detalles de los recursos favoritos.</p>`;
     return;
   }
 
@@ -283,6 +283,7 @@ window.renderizarFavoritos = function() {
         <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 2px;"><strong>Curso:</strong> ${cursoAsociado}</p>
         <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         
+        <!-- BOTONES APILADOS EN PERFIL -->
         <div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
           <button class="btn-like activo" onclick="toggleFavorito('${idRecurso}', this); window.renderizarFavoritos();" style="width: 100%; background: #ffc107; color: #000; border: 1px solid #ccc; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i class="fa-solid fa-star"></i> Guardado
@@ -297,7 +298,7 @@ window.renderizarFavoritos = function() {
   });
 };
 
-// 9. RENDERIZAR HISTORIAL EN EL PERFIL (ESPERANDO A GOOGLE SHEETS)
+// 9. RENDERIZAR HISTORIAL EN EL PERFIL
 window.renderizarHistorial = function() {
   const contenedor = document.getElementById('tab-content-historial');
   if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
@@ -309,10 +310,9 @@ window.renderizarHistorial = function() {
     return;
   }
 
-  // Esperar a que BASE_CURSOS esté lleno antes de buscar
   if (typeof BASE_CURSOS === 'undefined' || BASE_CURSOS.length === 0) {
     contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Cargando tu historial...</p>`;
-    setTimeout(window.renderizarHistorial, 500); // Reintenta en medio segundo
+    setTimeout(window.renderizarHistorial, 500);
     return;
   }
 
@@ -336,7 +336,7 @@ window.renderizarHistorial = function() {
   });
 };
 
-// 10. INICIALIZACIÓN GENERAL
+// 10. INICIALIZACIÓN GENERAL Y ESPERA DE DATOS
 document.addEventListener('DOMContentLoaded', () => {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -360,7 +360,6 @@ document.addEventListener('DOMContentLoaded', () => {
     selectAsignatura.addEventListener('change', aplicarFiltrosMultiples);
   }
 
-  // Revisar constantemente hasta que exista el usuario Y la base de datos haya cargado desde Google
   const verificarCarga = setInterval(() => {
     if (typeof usuarioActual !== 'undefined' && typeof BASE_CURSOS !== 'undefined' && BASE_CURSOS.length > 0) {
       clearInterval(verificarCarga);
