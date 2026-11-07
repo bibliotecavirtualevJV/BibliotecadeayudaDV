@@ -71,7 +71,7 @@ function aplicarFiltrosMultiples() {
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS
+// 3. RENDERIZADO DE TARJETAS (Con botones apilados: Me gusta arriba, Descargar abajo)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -90,7 +90,6 @@ function renderizarCursosResultantes(lista) {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
-    // Procesar enlace de Google Drive automáticamente
     let imgSrc = curso.portada || '';
     if (imgSrc.includes('drive.google.com')) {
       const matchId = imgSrc.match(/[-\w]{25,}/);
@@ -99,12 +98,10 @@ function renderizarCursosResultantes(lista) {
       }
     }
 
-    // Definir el nombre del libro y el curso claramente
     const idRecurso = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
     const tituloLibro = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso Académico';
     const cursoAsociado = curso.nombre || '';
 
-    // Verificar si ya está guardado en favoritos
     const esFav = (typeof usuarioActual !== 'undefined' && usuarioActual) 
       ? (JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || []).includes(idRecurso)
       : false;
@@ -125,18 +122,18 @@ function renderizarCursosResultantes(lista) {
           <span class="badge-formato" style="position: absolute; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; z-index: 2;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
         </div>
       </div>
-      <div class="libro-info" style="padding: 15px 0;">
+      <div class="libro-info" style="padding: 15px 0; display: flex; flex-direction: column; gap: 8px;">
         <h4 style="margin: 5px 0; font-size: 1.05rem; color: #1a2b4c; font-weight: bold;">${tituloLibro}</h4>
-        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 4px;"><strong>Curso:</strong> ${cursoAsociado}</p>
-        <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 12px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
+        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 2px;"><strong>Curso:</strong> ${cursoAsociado}</p>
+        <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         
-        <!-- Botones de Acción: Favorito y Descarga -->
-        <div style="display: flex; gap: 8px;">
-          <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="flex: 1; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px;">
+        <!-- BOTONES APILADOS: Me gusta arriba, Descargar abajo -->
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
+          <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="width: 100%; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
             <i class="fa-solid fa-star"></i> ${esFav ? 'Guardado' : 'Me gusta'}
           </button>
           
-          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; background:#5b2c91; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight: bold;">
+          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background:#5b2c91; color:#fff; padding:8px; border-radius:6px; text-decoration:none; font-weight: bold; box-sizing: border-box;">
             <i class="fa-solid fa-download"></i> Descargar
           </a>
         </div>
@@ -145,6 +142,128 @@ function renderizarCursosResultantes(lista) {
     contenedor.appendChild(card);
   });
 }
+
+// 5. LÓGICA DE FAVORITOS E HISTORIAL CONECTADA AL PERFIL
+window.toggleFavorito = function(idRecurso, btnElement) {
+  if (typeof usuarioActual === 'undefined' || !usuarioActual) {
+    const modalAuth = document.getElementById('modal-auth');
+    if (modalAuth) modalAuth.style.display = 'flex';
+    alert('Debes iniciar sesión para guardar recursos en tus favoritos.');
+    return;
+  }
+
+  const claveStorage = `favs_${usuarioActual.uid}`;
+  let favoritos = JSON.parse(localStorage.getItem(claveStorage)) || [];
+
+  const index = favoritos.indexOf(idRecurso);
+  if (index > -1) {
+    favoritos.splice(index, 1);
+    btnElement.style.background = '#f0f0f0';
+    btnElement.style.color = '#333';
+    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Me gusta';
+  } else {
+    favoritos.push(idRecurso);
+    btnElement.style.background = '#ffc107';
+    btnElement.style.color = '#000';
+    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Guardado';
+  }
+
+  localStorage.setItem(claveStorage, JSON.stringify(favoritos));
+  if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
+};
+
+window.registrarEnHistorial = function(idRecurso) {
+  if (typeof usuarioActual === 'undefined' || !usuarioActual) return;
+
+  const claveHistorial = `hist_${usuarioActual.uid}`;
+  let historial = JSON.parse(localStorage.getItem(claveHistorial)) || [];
+
+  // Evitar duplicados seguidos y guardar con fecha
+  const nuevoRegistro = { id: idRecurso, fecha: new Date().toLocaleDateString() };
+  historial = historial.filter(item => item.id !== idRecurso); // Evita repetir el mismo libro arriba
+  historial.unshift(nuevoRegistro);
+  
+  if (historial.length > 20) historial.pop();
+
+  localStorage.setItem(claveHistorial, JSON.stringify(historial));
+  if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
+};
+
+// 6. FUNCIONES DE RENDERIZADO PARA LA VISTA DE PERFIL (FAVORITOS E HISTORIAL)
+window.renderizarFavoritos = function() {
+  const contenedor = document.getElementById('tab-content-favoritos');
+  if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
+
+  const favoritosIds = JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || [];
+
+  if (favoritosIds.length === 0) {
+    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">No tienes recursos guardados en favoritos.</p>`;
+    return;
+  }
+
+  // Buscar los objetos completos en BASE_CURSOS
+  const recursosFavoritos = BASE_CURSOS.filter(curso => {
+    const idC = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
+    return favoritosIds.includes(idC);
+  });
+
+  contenedor.innerHTML = `<div class="grid-libros" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px;"></div>`;
+  const subGrid = contenedor.querySelector('.grid-libros');
+
+  recursosFavoritos.forEach(curso => {
+    const titulo = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso';
+    const card = document.createElement('div');
+    card.className = 'libro-card';
+    card.style.cssText = "background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px;";
+    card.innerHTML = `
+      <h4 style="font-size: 1rem; color: #1a2b4c; margin-bottom: 8px;">${titulo}</h4>
+      <p style="font-size: 0.8rem; color: #555; margin-bottom: 10px;">${curso.nombre || ''}</p>
+      <a href="${curso.link || '#'}" target="_blank" style="display: block; text-align: center; background: #5b2c91; color: #fff; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold;">Descargar</a>
+    `;
+    subGrid.appendChild(card);
+  });
+};
+
+window.renderizarHistorial = function() {
+  const contenedor = document.getElementById('tab-content-historial');
+  if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
+
+  const historial = JSON.parse(localStorage.getItem(`hist_${usuarioActual.uid}`)) || [];
+
+  if (historial.length === 0) {
+    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">Aún no has descargado ningún recurso.</p>`;
+    return;
+  }
+
+  contenedor.innerHTML = `<div style="display: flex; flex-direction: column; gap: 10px; padding: 20px;"></div>`;
+  const subList = contenedor.querySelector('div');
+
+  historial.forEach(reg => {
+    const cursoEncontrado = BASE_CURSOS.find(c => (c.id || c.codigo || c.tituloLibro || c.nombreLibro) === reg.id);
+    const titulo = cursoEncontrado ? (cursoEncontrado.nombreLibro || cursoEncontrado.tituloLibro || cursoEncontrado.nombre) : 'Recurso Descargado';
+    
+    const item = document.createElement('div');
+    item.style.cssText = "background: #f9f9f9; padding: 12px; border: 1px solid #eee; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
+    item.innerHTML = `
+      <div>
+        <strong>${titulo}</strong>
+        <span style="display: block; font-size: 0.75rem; color: #778;">Descargado el: ${reg.fecha}</span>
+      </div>
+      ${cursoEncontrado?.link ? `<a href="${cursoEncontrado.link}" target="_blank" style="background: #5b2c91; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;">Volver a Descargar</a>` : ''}
+    `;
+    subList.appendChild(item);
+  });
+};
+
+// Disparar la carga del perfil si ya hay sesión al abrir las pestañas
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if (typeof usuarioActual !== 'undefined' && usuarioActual) {
+      window.renderizarFavoritos();
+      window.renderizarHistorial();
+    }
+  }, 1000);
+});
 
 // 4. RESTABLECER FILTROS
 function limpiarFiltros() {
