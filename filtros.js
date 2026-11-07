@@ -222,18 +222,53 @@ window.renderizarFavoritos = function() {
     return favoritosIds.includes(idC);
   });
 
-  contenedor.innerHTML = `<div class="grid-libros" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px;"></div>`;
-  const subGrid = contenedor.querySelector('.grid-libros');
+  contenedor.innerHTML = `<div class="portadas-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px;"></div>`;
+  const subGrid = contenedor.querySelector('.portadas-grid');
 
   recursosFavoritos.forEach(curso => {
-    const titulo = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso';
     const card = document.createElement('div');
     card.className = 'libro-card';
-    card.style.cssText = "background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px;";
+
+    let imgSrc = curso.portada || '';
+    if (imgSrc.includes('drive.google.com')) {
+      const matchId = imgSrc.match(/[-\w]{25,}/);
+      if (matchId) {
+        imgSrc = `https://lh3.googleusercontent.com/d/${matchId[0]}`;
+      }
+    }
+
+    const idRecurso = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
+    const tituloLibro = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso Académico';
+    const cursoAsociado = curso.nombre || '';
+
+    let contenidoPortada = '';
+    if (imgSrc && imgSrc.trim() !== '') {
+      contenidoPortada = `<img src="${imgSrc}" alt="Portada" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" onerror="this.style.display='none';">`;
+    } else {
+      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${tituloLibro}</strong>`;
+    }
+
     card.innerHTML = `
-      <h4 style="font-size: 1rem; color: #1a2b4c; margin-bottom: 8px;">${titulo}</h4>
-      <p style="font-size: 0.8rem; color: #555; margin-bottom: 10px;">${curso.nombre || ''}</p>
-      <a href="${curso.link || '#'}" target="_blank" style="display: block; text-align: center; background: #5b2c91; color: #fff; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold;">Descargar</a>
+      <div class="portada-wrapper">
+        <div class="portada-placeholder" style="background: linear-gradient(135deg, #5b2c91, #3b1d59); color: #fff; height: 180px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; border-radius: 8px; position: relative;">
+          ${contenidoPortada}
+          <span class="badge-formato" style="position: absolute; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; z-index: 2;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
+        </div>
+      </div>
+      <div class="libro-info" style="padding: 15px 0; display: flex; flex-direction: column; gap: 8px;">
+        <h4 style="margin: 5px 0; font-size: 1.05rem; color: #1a2b4c; font-weight: bold;">${tituloLibro}</h4>
+        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 2px;"><strong>Curso:</strong> ${cursoAsociado}</p>
+        <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
+          <button class="btn-like activo" onclick="toggleFavorito('${idRecurso}', this); window.renderizarFavoritos();" style="width: 100%; background: #ffc107; color: #000; border: 1px solid #ccc; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="fa-solid fa-star"></i> Guardado
+          </button>
+          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background:#5b2c91; color:#fff; padding:8px; border-radius:6px; text-decoration:none; font-weight: bold; box-sizing: border-box;">
+            <i class="fa-solid fa-download"></i> Descargar
+          </a>
+        </div>
+      </div>
     `;
     subGrid.appendChild(card);
   });
@@ -258,18 +293,17 @@ window.renderizarHistorial = function() {
     const titulo = cursoEncontrado ? (cursoEncontrado.nombreLibro || cursoEncontrado.tituloLibro || cursoEncontrado.nombre) : 'Recurso Descargado';
     
     const item = document.createElement('div');
-    item.style.cssText = "background: #f9f9f9; padding: 12px; border: 1px solid #eee; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
+    item.style.cssText = "background: #f9f9f9; padding: 12px; border: 1px solid #eee; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;";
     item.innerHTML = `
       <div>
         <strong>${titulo}</strong>
         <span style="display: block; font-size: 0.75rem; color: #778;">Descargado el: ${reg.fecha}</span>
       </div>
-      ${cursoEncontrado?.link ? `<a href="${cursoEncontrado.link}" target="_blank" style="background: #5b2c91; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;">Volver a Descargar</a>` : ''}
+      ${cursoEncontrado?.link ? `<a href="${cursoEncontrado.link}" target="_blank" style="background: #5b2c91; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: bold;">Volver a Descargar</a>` : ''}
     `;
     subList.appendChild(item);
   });
 };
-
 // 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA
 function actualizarEstadisticasBarra() {
   if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) return;
