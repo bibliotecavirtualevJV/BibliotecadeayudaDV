@@ -143,6 +143,23 @@ function renderizarCursosResultantes(lista) {
   });
 }
 
+// 4. RESTABLECER FILTROS
+function limpiarFiltros() {
+  const selectCarrera = document.getElementById('select-carrera');
+  const selectCiclo = document.getElementById('select-ciclo');
+  const selectAsignatura = document.getElementById('select-asignatura');
+  const inputBuscador = document.getElementById('input-buscador');
+
+  if (selectCarrera) selectCarrera.value = 'todas';
+  if (selectCiclo) selectCiclo.value = 'todos';
+  if (inputBuscador) inputBuscador.value = '';
+
+  actualizarOpcionesAsignatura();
+  if (selectAsignatura) selectAsignatura.value = 'todas';
+
+  aplicarFiltrosMultiples();
+}
+
 // 5. LÓGICA DE FAVORITOS E HISTORIAL CONECTADA AL PERFIL
 window.toggleFavorito = function(idRecurso, btnElement) {
   if (typeof usuarioActual === 'undefined' || !usuarioActual) {
@@ -178,9 +195,8 @@ window.registrarEnHistorial = function(idRecurso) {
   const claveHistorial = `hist_${usuarioActual.uid}`;
   let historial = JSON.parse(localStorage.getItem(claveHistorial)) || [];
 
-  // Evitar duplicados seguidos y guardar con fecha
   const nuevoRegistro = { id: idRecurso, fecha: new Date().toLocaleDateString() };
-  historial = historial.filter(item => item.id !== idRecurso); // Evita repetir el mismo libro arriba
+  historial = historial.filter(item => item.id !== idRecurso);
   historial.unshift(nuevoRegistro);
   
   if (historial.length > 20) historial.pop();
@@ -201,7 +217,6 @@ window.renderizarFavoritos = function() {
     return;
   }
 
-  // Buscar los objetos completos en BASE_CURSOS
   const recursosFavoritos = BASE_CURSOS.filter(curso => {
     const idC = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
     return favoritosIds.includes(idC);
@@ -255,83 +270,35 @@ window.renderizarHistorial = function() {
   });
 };
 
-// Disparar la carga del perfil si ya hay sesión al abrir las pestañas
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    if (typeof usuarioActual !== 'undefined' && usuarioActual) {
-      window.renderizarFavoritos();
-      window.renderizarHistorial();
-    }
-  }, 1000);
-});
+// 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA
+function actualizarEstadisticasBarra() {
+  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) return;
 
-// 4. RESTABLECER FILTROS
-function limpiarFiltros() {
-  const selectCarrera = document.getElementById('select-carrera');
-  const selectCiclo = document.getElementById('select-ciclo');
-  const selectAsignatura = document.getElementById('select-asignatura');
-  const inputBuscador = document.getElementById('input-buscador');
+  const totalRecursos = BASE_CURSOS.length;
 
-  if (selectCarrera) selectCarrera.value = 'todas';
-  if (selectCiclo) selectCiclo.value = 'todos';
-  if (inputBuscador) inputBuscador.value = '';
+  const totalLibros = BASE_CURSOS.filter(curso => {
+    const modalidad = String(curso.modalidad || '').toLowerCase();
+    const formato = String(curso.formato || '').toLowerCase();
+    return modalidad.includes('pdf') || modalidad.includes('libro') || formato.includes('pdf') || formato.includes('libro') || curso.link;
+  }).length;
 
-  actualizarOpcionesAsignatura();
-  if (selectAsignatura) selectAsignatura.value = 'todas';
+  let usuariosConocidos = JSON.parse(localStorage.getItem('registro_usuarios_locales')) || [];
+  if (typeof usuarioActual !== 'undefined' && usuarioActual && !usuariosConocidos.includes(usuarioActual.uid)) {
+    usuariosConocidos.push(usuarioActual.uid);
+    localStorage.setItem('registro_usuarios_locales', JSON.stringify(usuariosConocidos));
+  }
+  const totalUsuarios = 50 + usuariosConocidos.length;
 
-  aplicarFiltrosMultiples();
+  const elRecursos = document.getElementById('stat-recursos');
+  const elLibros = document.getElementById('stat-libros');
+  const elUsuarios = document.getElementById('stat-usuarios');
+
+  if (elRecursos) elRecursos.textContent = `+ ${totalRecursos}`;
+  if (elLibros) elLibros.textContent = `+ ${totalLibros}`;
+  if (elUsuarios) elUsuarios.textContent = `+ ${totalUsuarios}`;
 }
 
-// 5. LÓGICA INTERACTIVA DE FAVORITOS (LIKE) E HISTORIAL
-window.toggleFavorito = function(idRecurso, btnElement) {
-  if (typeof usuarioActual === 'undefined' || !usuarioActual) {
-    const modalAuth = document.getElementById('modal-auth');
-    if (modalAuth) {
-      modalAuth.style.display = 'flex';
-    }
-    alert('Debes iniciar sesión para guardar recursos en tus favoritos.');
-    return;
-  }
-
-  const claveStorage = `favs_${usuarioActual.uid}`;
-  let favoritos = JSON.parse(localStorage.getItem(claveStorage)) || [];
-
-  const index = favoritos.indexOf(idRecurso);
-  if (index > -1) {
-    favoritos.splice(index, 1);
-    btnElement.style.background = '#f0f0f0';
-    btnElement.style.color = '#333';
-    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Me gusta';
-  } else {
-    favoritos.push(idRecurso);
-    btnElement.style.background = '#ffc107';
-    btnElement.style.color = '#000';
-    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Guardado';
-  }
-
-  localStorage.setItem(claveStorage, JSON.stringify(favoritos));
-  if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
-};
-
-window.registrarEnHistorial = function(idRecurso) {
-  if (typeof usuarioActual === 'undefined' || !usuarioActual) return;
-
-  const claveHistorial = `hist_${usuarioActual.uid}`;
-  let historial = JSON.parse(localStorage.getItem(claveHistorial)) || [];
-
-  const nuevoRegistro = {
-    id: idRecurso,
-    fecha: new Date().toLocaleDateString()
-  };
-
-  historial.unshift(nuevoRegistro);
-  if (historial.length > 20) historial.pop();
-
-  localStorage.setItem(claveHistorial, JSON.stringify(historial));
-  if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
-};
-
-// 6. INICIALIZACIÓN
+// 8. INICIALIZACIÓN GENERAL
 document.addEventListener('DOMContentLoaded', () => {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -357,35 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
-});
-// Actualización dinámica de estadísticas de la barra de conocimiento
-function actualizarEstadisticasBarra() {
-  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) return;
 
-  const totalRecursos = BASE_CURSOS.length;
-
-  const totalLibros = BASE_CURSOS.filter(curso => {
-    const modalidad = String(curso.modalidad || '').toLowerCase();
-    const formato = String(curso.formato || '').toLowerCase();
-    return modalidad.includes('pdf') || modalidad.includes('libro') || formato.includes('pdf') || formato.includes('libro');
-  }).length;
-
-  let usuariosConocidos = JSON.parse(localStorage.getItem('registro_usuarios_locales')) || [];
-  if (typeof usuarioActual !== 'undefined' && usuarioActual && !usuariosConocidos.includes(usuarioActual.uid)) {
-    usuariosConocidos.push(usuarioActual.uid);
-    localStorage.setItem('registro_usuarios_locales', JSON.stringify(usuariosConocidos));
-  }
-  const totalUsuarios = 50 + usuariosConocidos.length;
-
-  const elRecursos = document.getElementById('stat-recursos');
-  const elLibros = document.getElementById('stat-libros');
-  const elUsuarios = document.getElementById('stat-usuarios');
-
-  if (elRecursos) elRecursos.textContent = `+ ${totalRecursos}`;
-  if (elLibros) elLibros.textContent = `+ ${totalLibros}`;
-  if (elUsuarios) elUsuarios.textContent = `+ ${totalUsuarios}`;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(actualizarEstadisticasBarra, 500);
+  setTimeout(() => {
+    if (typeof usuarioActual !== 'undefined' && usuarioActual) {
+      window.renderizarFavoritos();
+      window.renderizarHistorial();
+    }
+    actualizarEstadisticasBarra();
+  }, 600);
 });
