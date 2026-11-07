@@ -222,6 +222,8 @@ function iniciarModuloAutenticacion() {
   // Estado del usuario en tiempo real
   onAuthStateChanged(auth, (user) => {
     usuarioActual = user;
+    window.usuarioActual = user; // <--- Hacemos global el usuario para que filtros.js lo detecte
+    
     const labelUsuario = document.getElementById('label-usuario');
     const userEmailDisplay = document.getElementById('user-email-display');
     const profileName = document.getElementById('profile-name');
