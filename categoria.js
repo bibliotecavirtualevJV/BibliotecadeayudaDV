@@ -1,34 +1,40 @@
 let librosCategoriaActual = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Obtener la categoría desde la URL (ej. categoria.html?cat=pedagogia)
+function inicializarCategoria() {
   const params = new URLSearchParams(window.location.search);
-  const catParam = (params.get('cat') || 'todas').toLowerCase();
+  const catParamCrudo = params.get('cat') || 'todas';
+  // Normalizar parámetro de la URL (quitar tildes y pasar a minúsculas)
+  const catParam = catParamCrudo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  // 2. Colocar título dinámico
   const tituloEl = document.getElementById('titulo-categoria');
   if (tituloEl) {
-    tituloEl.innerText = 'Categoría: ' + catParam.toUpperCase();
+    tituloEl.innerText = 'Categoría: ' + catParamCrudo.toUpperCase();
   }
 
-  // 3. Obtener la base de datos real (BASE_CURSOS)
   const listaBase = (typeof BASE_CURSOS !== 'undefined') ? BASE_CURSOS : [];
 
-  // 4. Filtrar por categoría comparando en minúsculas de forma flexible
   librosCategoriaActual = listaBase.filter(item => {
-    const catItem = String(item.categoria || '').toLowerCase();
+    const catItem = String(item.categoria || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     return catItem.includes(catParam) || catItem === catParam;
   });
 
-  // 5. Ordenar alfabéticamente por título
   librosCategoriaActual.sort((a, b) => {
-    const nombreA = a.nombre || a.titulo || '';
-    const nombreB = b.nombre || b.titulo || '';
+    const nombreA = a.nombreLibro || a.nombre || a.titulo || '';
+    const nombreB = b.nombreLibro || b.nombre || b.titulo || '';
     return nombreA.localeCompare(nombreB);
   });
 
-  // 6. Renderizar
   renderizarLibros(librosCategoriaActual);
+}
+
+// Escuchar la carga de la API de Google Sheets
+window.addEventListener('DOMContentLoaded', () => {
+  const verificarCarga = setInterval(() => {
+    if (typeof BASE_CURSOS !== 'undefined' && BASE_CURSOS.length > 0) {
+      clearInterval(verificarCarga);
+      inicializarCategoria();
+    }
+  }, 100);
 });
 
 function renderizarLibros(lista) {
@@ -46,7 +52,6 @@ function renderizarLibros(lista) {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
-    // Procesar enlace de Google Drive si viene del formulario
     let imgSrc = curso.portada || '';
     if (imgSrc.includes('drive.google.com')) {
       const matchId = imgSrc.match(/[-\w]{25,}/);
@@ -90,7 +95,7 @@ function filtrarYOrdenar() {
 
   const texto = input.value.toLowerCase().trim();
   const filtrados = librosCategoriaActual.filter(item => {
-    const nombre = (item.nombre || item.titulo || '').toLowerCase();
+    const nombre = (item.nombreLibro || item.nombre || item.titulo || '').toLowerCase();
     const autor = (item.autor || '').toLowerCase();
     return nombre.includes(texto) || autor.includes(texto);
   });
