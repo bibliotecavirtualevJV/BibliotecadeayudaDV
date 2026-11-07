@@ -100,8 +100,14 @@ function renderizarCursosResultantes(lista) {
     }
 
     // Definir el nombre del libro y el curso claramente
+    const idRecurso = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
     const tituloLibro = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso Académico';
     const cursoAsociado = curso.nombre || '';
+
+    // Verificar si ya está guardado en favoritos
+    const esFav = (typeof usuarioActual !== 'undefined' && usuarioActual) 
+      ? (JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || []).includes(idRecurso)
+      : false;
 
     let contenidoPortada = '';
     if (imgSrc && imgSrc.trim() !== '') {
@@ -123,9 +129,17 @@ function renderizarCursosResultantes(lista) {
         <h4 style="margin: 5px 0; font-size: 1.05rem; color: #1a2b4c; font-weight: bold;">${tituloLibro}</h4>
         <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 4px;"><strong>Curso:</strong> ${cursoAsociado}</p>
         <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 12px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
-        <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; background:#5b2c91; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight: bold;">
-          <i class="fa-solid fa-download"></i> Descargar
-        </a>
+        
+        <!-- Botones de Acción: Favorito y Descarga -->
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="flex: 1; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <i class="fa-solid fa-star"></i> ${esFav ? 'Guardado' : 'Me gusta'}
+          </button>
+          
+          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; background:#5b2c91; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight: bold;">
+            <i class="fa-solid fa-download"></i> Descargar
+          </a>
+        </div>
       </div>
     `;
     contenedor.appendChild(card);
@@ -149,7 +163,56 @@ function limpiarFiltros() {
   aplicarFiltrosMultiples();
 }
 
-// 5. INICIALIZACIÓN
+// 5. LÓGICA INTERACTIVA DE FAVORITOS (LIKE) E HISTORIAL
+window.toggleFavorito = function(idRecurso, btnElement) {
+  if (typeof usuarioActual === 'undefined' || !usuarioActual) {
+    const modalAuth = document.getElementById('modal-auth');
+    if (modalAuth) {
+      modalAuth.style.display = 'flex';
+    }
+    alert('Debes iniciar sesión para guardar recursos en tus favoritos.');
+    return;
+  }
+
+  const claveStorage = `favs_${usuarioActual.uid}`;
+  let favoritos = JSON.parse(localStorage.getItem(claveStorage)) || [];
+
+  const index = favoritos.indexOf(idRecurso);
+  if (index > -1) {
+    favoritos.splice(index, 1);
+    btnElement.style.background = '#f0f0f0';
+    btnElement.style.color = '#333';
+    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Me gusta';
+  } else {
+    favoritos.push(idRecurso);
+    btnElement.style.background = '#ffc107';
+    btnElement.style.color = '#000';
+    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Guardado';
+  }
+
+  localStorage.setItem(claveStorage, JSON.stringify(favoritos));
+  if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
+};
+
+window.registrarEnHistorial = function(idRecurso) {
+  if (typeof usuarioActual === 'undefined' || !usuarioActual) return;
+
+  const claveHistorial = `hist_${usuarioActual.uid}`;
+  let historial = JSON.parse(localStorage.getItem(claveHistorial)) || [];
+
+  const nuevoRegistro = {
+    id: idRecurso,
+    fecha: new Date().toLocaleDateString()
+  };
+
+  historial.unshift(nuevoRegistro);
+  if (historial.length > 20) historial.pop();
+
+  localStorage.setItem(claveHistorial, JSON.stringify(historial));
+  if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
+};
+
+// 6. INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
