@@ -304,10 +304,10 @@ window.renderizarHistorial = function() {
     subList.appendChild(item);
   });
 };
+
 // 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA (Con reintento automático)
 function actualizarEstadisticasBarra() {
   if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
-    // Si la base aún no carga, vuelve a intentarlo en medio segundo
     setTimeout(actualizarEstadisticasBarra, 500);
     return;
   }
@@ -336,7 +336,39 @@ function actualizarEstadisticasBarra() {
   if (elUsuarios) elUsuarios.textContent = `+ ${totalUsuarios}`;
 }
 
-// Ejecutar al cargar la página
+// 8. INICIALIZACIÓN GENERAL Y DISPARADOR DE ESTADÍSTICAS
 document.addEventListener('DOMContentLoaded', () => {
-  actualizarEstadisticasBarra();
+  const selectCarrera = document.getElementById('select-carrera');
+  const selectCiclo = document.getElementById('select-ciclo');
+  const selectAsignatura = document.getElementById('select-asignatura');
+
+  if (selectCarrera) {
+    selectCarrera.addEventListener('change', () => {
+      actualizarOpcionesAsignatura();
+      aplicarFiltrosMultiples();
+    });
+  }
+
+  if (selectCiclo) {
+    selectCiclo.addEventListener('change', () => {
+      actualizarOpcionesAsignatura();
+      aplicarFiltrosMultiples();
+    });
+  }
+
+  if (selectAsignatura) {
+    selectAsignatura.addEventListener('change', aplicarFiltrosMultiples);
+  }
+
+  actualizarOpcionesAsignatura();
+  aplicarFiltrosMultiples();
+
+  // Ejecutar estadísticas y renderizado de perfil si hay sesión
+  setTimeout(() => {
+    if (typeof usuarioActual !== 'undefined' && usuarioActual) {
+      window.renderizarFavoritos();
+      window.renderizarHistorial();
+    }
+    actualizarEstadisticasBarra();
+  }, 500);
 });
