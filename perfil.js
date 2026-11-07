@@ -1,21 +1,24 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Configuración Firebase (mismas credenciales)
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBQgqn3ZFCA1bcPGrM69JHRJslGHS_zhOc",
   authDomain: "biblioteca-fahusaccicloiv.firebaseapp.com",
   projectId: "biblioteca-fahusaccicloiv",
   storageBucket: "biblioteca-fahusaccicloiv.firebasestorage.app",
   messagingSenderId: "5848760982",
-  appId: "1:5848760982:web:17762af3d20ff3e54a78b7"
+  appId: "1:5848760982:web:17762af3d20ff3e54a78b7",
+  measurementId: "G-95N8ZW65KY"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-let usuarioActual = null;
-
+const analytics = getAnalytics(app);
 // Control de vistas
 function mostrarPerfil(seccion = 'favoritos') {
   const seccionesOcultar = ['catalogo', 'inicio', 'accesos-rapidos', 'recursos', 'categorias', 'ayuda', 'contacto'];
