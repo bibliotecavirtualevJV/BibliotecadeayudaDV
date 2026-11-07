@@ -304,7 +304,6 @@ window.renderizarHistorial = function() {
     subList.appendChild(item);
   });
 };
-
 // 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA (Con reintento automático)
 function actualizarEstadisticasBarra() {
   if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
