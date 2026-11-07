@@ -71,7 +71,12 @@ function aplicarFiltrosMultiples() {
   }
 }
 
-// 3. RENDERIZADO DE TARJETAS
+// 3. FUNCIÓN DE APOYO UNIFICADA PARA OBTENER ID
+function obtenerIdCurso(curso) {
+  return String(curso.id || curso.codigo || curso.codigo_curso || curso.tituloLibro || curso.nombreLibro || '').trim();
+}
+
+// 4. RENDERIZADO DE TARJETAS (Con persistencia correcta al recargar)
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -86,11 +91,16 @@ function renderizarCursosResultantes(lista) {
     return;
   }
 
+  // Obtener favoritos del usuario actual de manera segura
+  let favoritosIds = [];
+  if (typeof usuarioActual !== 'undefined' && usuarioActual && usuarioActual.uid) {
+    favoritosIds = JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || [];
+  }
+
   lista.forEach(curso => {
     const card = document.createElement('div');
     card.className = 'libro-card';
 
-    // Procesar enlace de Google Drive automáticamente
     let imgSrc = curso.portada || '';
     if (imgSrc.includes('drive.google.com')) {
       const matchId = imgSrc.match(/[-\w]{25,}/);
@@ -99,15 +109,11 @@ function renderizarCursosResultantes(lista) {
       }
     }
 
-    // Definir el nombre del libro y el curso claramente
-    const idRecurso = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
+    const idRecurso = obtenerIdCurso(curso);
     const tituloLibro = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso Académico';
     const cursoAsociado = curso.nombre || '';
 
-    // Verificar si ya está guardado en favoritos
-    const esFav = (typeof usuarioActual !== 'undefined' && usuarioActual) 
-      ? (JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || []).includes(idRecurso)
-      : false;
+    const esFav = favoritosIds.includes(idRecurso);
 
     let contenidoPortada = '';
     if (imgSrc && imgSrc.trim() !== '') {
@@ -146,7 +152,7 @@ function renderizarCursosResultantes(lista) {
   });
 }
 
-// 4. RESTABLECER FILTROS
+// 5. RESTABLECER FILTROS
 function limpiarFiltros() {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -161,12 +167,9 @@ function limpiarFiltros() {
   if (selectAsignatura) selectAsignatura.value = 'todas';
 
   aplicarFiltrosMultiples();
-}// 1. OBTENER ID ÚNICO DEL CURSO (Función de apoyo unificada)
-function obtenerIdCurso(curso) {
-  return String(curso.id || curso.codigo || curso.codigo_curso || curso.tituloLibro || curso.nombreLibro || '').trim();
 }
 
-// 2. TOGGLE FAVORITO (Corregido para guardar correctamente)
+// 6. GESTIÓN DE FAVORITOS
 window.toggleFavorito = function(idRecurso, btnElement) {
   if (typeof usuarioActual === 'undefined' || !usuarioActual) {
     const modalAuth = document.getElementById('modal-auth');
@@ -199,7 +202,26 @@ window.toggleFavorito = function(idRecurso, btnElement) {
   if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
 };
 
-// 3. RENDERIZAR FAVORITOS EN EL PERFIL (Búsqueda exacta)
+// 7. REGISTRAR HISTORIAL DE DESCARGAS
+window.registrarEnHistorial = function(idRecurso) {
+  if (typeof usuarioActual === 'undefined' || !usuarioActual) return;
+
+  const claveHistorial = `hist_${usuarioActual.uid}`;
+  let historial = JSON.parse(localStorage.getItem(claveHistorial)) || [];
+
+  const idLimpio = String(idRecurso).trim();
+  const nuevoRegistro = { id: idLimpio, fecha: new Date().toLocaleDateString() };
+  
+  historial = historial.filter(item => String(item.id).trim() !== idLimpio);
+  historial.unshift(nuevoRegistro);
+  
+  if (historial.length > 20) historial.pop();
+
+  localStorage.setItem(claveHistorial, JSON.stringify(historial));
+  if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
+};
+
+// 8. RENDERIZAR FAVORITOS EN EL PERFIL
 window.renderizarFavoritos = function() {
   const contenedor = document.getElementById('tab-content-favoritos');
   if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
@@ -211,7 +233,6 @@ window.renderizarFavoritos = function() {
     return;
   }
 
-  // Filtrar usando la función unificada de ID
   const recursosFavoritos = BASE_CURSOS.filter(curso => {
     const idC = obtenerIdCurso(curso);
     return favoritosIds.includes(idC);
@@ -274,7 +295,7 @@ window.renderizarFavoritos = function() {
   });
 };
 
-// 4. RENDERIZAR HISTORIAL EN EL PERFIL (Muestra los nombres reales)
+// 9. RENDERIZAR HISTORIAL EN EL PERFIL
 window.renderizarHistorial = function() {
   const contenedor = document.getElementById('tab-content-historial');
   if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
@@ -290,7 +311,6 @@ window.renderizarHistorial = function() {
   const subList = contenedor.querySelector('div');
 
   historial.forEach(reg => {
-    // Buscar el curso comparando con la función unificada de ID
     const cursoEncontrado = BASE_CURSOS.find(c => obtenerIdCurso(c) === String(reg.id).trim());
     const titulo = cursoEncontrado ? (cursoEncontrado.nombreLibro || cursoEncontrado.tituloLibro || cursoEncontrado.nombre) : 'Recurso Descargado';
     
@@ -307,182 +327,7 @@ window.renderizarHistorial = function() {
   });
 };
 
-// 5. LÓGICA DE FAVORITOS E HISTORIAL CONECTADA AL PERFIL
-window.toggleFavorito = function(idRecurso, btnElement) {
-  if (typeof usuarioActual === 'undefined' || !usuarioActual) {
-    const modalAuth = document.getElementById('modal-auth');
-    if (modalAuth) modalAuth.style.display = 'flex';
-    alert('Debes iniciar sesión para guardar recursos en tus favoritos.');
-    return;
-  }
-
-  const claveStorage = `favs_${usuarioActual.uid}`;
-  let favoritos = JSON.parse(localStorage.getItem(claveStorage)) || [];
-
-  const index = favoritos.indexOf(idRecurso);
-  if (index > -1) {
-    favoritos.splice(index, 1);
-    btnElement.style.background = '#f0f0f0';
-    btnElement.style.color = '#333';
-    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Me gusta';
-  } else {
-    favoritos.push(idRecurso);
-    btnElement.style.background = '#ffc107';
-    btnElement.style.color = '#000';
-    btnElement.innerHTML = '<i class="fa-solid fa-star"></i> Guardado';
-  }
-
-  localStorage.setItem(claveStorage, JSON.stringify(favoritos));
-  if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
-};
-
-window.registrarEnHistorial = function(idRecurso) {
-  if (typeof usuarioActual === 'undefined' || !usuarioActual) return;
-
-  const claveHistorial = `hist_${usuarioActual.uid}`;
-  let historial = JSON.parse(localStorage.getItem(claveHistorial)) || [];
-
-  const nuevoRegistro = { id: idRecurso, fecha: new Date().toLocaleDateString() };
-  historial = historial.filter(item => item.id !== idRecurso);
-  historial.unshift(nuevoRegistro);
-  
-  if (historial.length > 20) historial.pop();
-
-  localStorage.setItem(claveHistorial, JSON.stringify(historial));
-  if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
-};
-
-// 6. FUNCIONES DE RENDERIZADO PARA LA VISTA DE PERFIL (FAVORITOS E HISTORIAL)
-window.renderizarFavoritos = function() {
-  const contenedor = document.getElementById('tab-content-favoritos');
-  if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
-
-  const favoritosIds = JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || [];
-
-  if (favoritosIds.length === 0) {
-    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">No tienes recursos guardados en favoritos.</p>`;
-    return;
-  }
-
-  const recursosFavoritos = BASE_CURSOS.filter(curso => {
-    const idC = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
-    return favoritosIds.includes(idC);
-  });
-
-  contenedor.innerHTML = `<div class="portadas-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px;"></div>`;
-  const subGrid = contenedor.querySelector('.portadas-grid');
-
-  recursosFavoritos.forEach(curso => {
-    const card = document.createElement('div');
-    card.className = 'libro-card';
-
-    let imgSrc = curso.portada || '';
-    if (imgSrc.includes('drive.google.com')) {
-      const matchId = imgSrc.match(/[-\w]{25,}/);
-      if (matchId) {
-        imgSrc = `https://lh3.googleusercontent.com/d/${matchId[0]}`;
-      }
-    }
-
-    const idRecurso = curso.id || curso.codigo || curso.tituloLibro || curso.nombreLibro;
-    const tituloLibro = curso.nombreLibro || curso.tituloLibro || curso.nombre || 'Recurso Académico';
-    const cursoAsociado = curso.nombre || '';
-
-    let contenidoPortada = '';
-    if (imgSrc && imgSrc.trim() !== '') {
-      contenidoPortada = `<img src="${imgSrc}" alt="Portada" style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" onerror="this.style.display='none';">`;
-    } else {
-      contenidoPortada = `<strong style="padding: 10px; font-size: 0.95rem; position: relative; z-index: 1; color: white;">${tituloLibro}</strong>`;
-    }
-
-    card.innerHTML = `
-      <div class="portada-wrapper">
-        <div class="portada-placeholder" style="background: linear-gradient(135deg, #5b2c91, #3b1d59); color: #fff; height: 180px; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; border-radius: 8px; position: relative;">
-          ${contenidoPortada}
-          <span class="badge-formato" style="position: absolute; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; z-index: 2;">${(curso.modalidad || 'PDF').toUpperCase()}</span>
-        </div>
-      </div>
-      <div class="libro-info" style="padding: 15px 0; display: flex; flex-direction: column; gap: 8px;">
-        <h4 style="margin: 5px 0; font-size: 1.05rem; color: #1a2b4c; font-weight: bold;">${tituloLibro}</h4>
-        <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 2px;"><strong>Curso:</strong> ${cursoAsociado}</p>
-        <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: auto;">
-          <button class="btn-like activo" onclick="toggleFavorito('${idRecurso}', this); window.renderizarFavoritos();" style="width: 100%; background: #ffc107; color: #000; border: 1px solid #ccc; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <i class="fa-solid fa-star"></i> Guardado
-          </button>
-          <a href="${curso.link || '#'}" class="btn-descargar-card" target="_blank" onclick="registrarEnHistorial('${idRecurso}')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background:#5b2c91; color:#fff; padding:8px; border-radius:6px; text-decoration:none; font-weight: bold; box-sizing: border-box;">
-            <i class="fa-solid fa-download"></i> Descargar
-          </a>
-        </div>
-      </div>
-    `;
-    subGrid.appendChild(card);
-  });
-};
-
-window.renderizarHistorial = function() {
-  const contenedor = document.getElementById('tab-content-historial');
-  if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
-
-  const historial = JSON.parse(localStorage.getItem(`hist_${usuarioActual.uid}`)) || [];
-
-  if (historial.length === 0) {
-    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">Aún no has descargado ningún recurso.</p>`;
-    return;
-  }
-
-  contenedor.innerHTML = `<div style="display: flex; flex-direction: column; gap: 10px; padding: 20px;"></div>`;
-  const subList = contenedor.querySelector('div');
-
-  historial.forEach(reg => {
-    const cursoEncontrado = BASE_CURSOS.find(c => (c.id || c.codigo || c.tituloLibro || c.nombreLibro) === reg.id);
-    const titulo = cursoEncontrado ? (cursoEncontrado.nombreLibro || cursoEncontrado.tituloLibro || cursoEncontrado.nombre) : 'Recurso Descargado';
-    
-    const item = document.createElement('div');
-    item.style.cssText = "background: #f9f9f9; padding: 12px; border: 1px solid #eee; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;";
-    item.innerHTML = `
-      <div>
-        <strong>${titulo}</strong>
-        <span style="display: block; font-size: 0.75rem; color: #778;">Descargado el: ${reg.fecha}</span>
-      </div>
-      ${cursoEncontrado?.link ? `<a href="${cursoEncontrado.link}" target="_blank" style="background: #5b2c91; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: bold;">Volver a Descargar</a>` : ''}
-    `;
-    subList.appendChild(item);
-  });
-};
-// 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA (Con reintento automático)
-function actualizarEstadisticasBarra() {
-  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
-    setTimeout(actualizarEstadisticasBarra, 500);
-    return;
-  }
-
-  const totalRecursos = BASE_CURSOS.length;
-
-  const totalLibros = BASE_CURSOS.filter(curso => {
-    const modalidad = String(curso.modalidad || '').toLowerCase();
-    const formato = String(curso.formato || '').toLowerCase();
-    return modalidad.includes('pdf') || modalidad.includes('libro') || formato.includes('pdf') || formato.includes('libro') || curso.link;
-  }).length;
-
-  let usuariosConocidos = JSON.parse(localStorage.getItem('registro_usuarios_locales')) || [];
-  if (typeof usuarioActual !== 'undefined' && usuarioActual && !usuariosConocidos.includes(usuarioActual.uid)) {
-    usuariosConocidos.push(usuarioActual.uid);
-    localStorage.setItem('registro_usuarios_locales', JSON.stringify(usuariosConocidos));
-  }
-  const totalUsuarios = 50 + usuariosConocidos.length;
-
-  const elRecursos = document.getElementById('stat-recursos');
-  const elLibros = document.getElementById('stat-libros');
-  const elUsuarios = document.getElementById('stat-usuarios');
-
-  if (elRecursos) elRecursos.textContent = `+ ${totalRecursos}`;
-  if (elLibros) elLibros.textContent = `+ ${totalLibros}`;
-  if (elUsuarios) elUsuarios.textContent = `+ ${totalUsuarios}`;
-}
-
-// 8. INICIALIZACIÓN GENERAL Y DISPARADOR DE ESTADÍSTICAS
+// 10. INICIALIZACIÓN GENERAL Y ESPERA DE SESIÓN PARA PERSISTENCIA
 document.addEventListener('DOMContentLoaded', () => {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -509,12 +354,15 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
 
-  // Ejecutar estadísticas y renderizado de perfil si hay sesión
-  setTimeout(() => {
-    if (typeof usuarioActual !== 'undefined' && usuarioActual) {
-      window.renderizarFavoritos();
-      window.renderizarHistorial();
+  // Sincronizar estado de sesión para asegurar que los favoritos se pinten bien al recargar
+  const verificarSesion = setInterval(() => {
+    if (typeof usuarioActual !== 'undefined') {
+      clearInterval(verificarSesion);
+      aplicarFiltrosMultiples();
+      if (usuarioActual) {
+        if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
+        if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
+      }
     }
-    actualizarEstadisticasBarra();
-  }, 500);
+  }, 200);
 });
