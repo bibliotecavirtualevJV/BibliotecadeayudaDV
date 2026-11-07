@@ -358,3 +358,34 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarOpcionesAsignatura();
   aplicarFiltrosMultiples();
 });
+// Actualización dinámica de estadísticas de la barra de conocimiento
+function actualizarEstadisticasBarra() {
+  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) return;
+
+  const totalRecursos = BASE_CURSOS.length;
+
+  const totalLibros = BASE_CURSOS.filter(curso => {
+    const modalidad = String(curso.modalidad || '').toLowerCase();
+    const formato = String(curso.formato || '').toLowerCase();
+    return modalidad.includes('pdf') || modalidad.includes('libro') || formato.includes('pdf') || formato.includes('libro');
+  }).length;
+
+  let usuariosConocidos = JSON.parse(localStorage.getItem('registro_usuarios_locales')) || [];
+  if (typeof usuarioActual !== 'undefined' && usuarioActual && !usuariosConocidos.includes(usuarioActual.uid)) {
+    usuariosConocidos.push(usuarioActual.uid);
+    localStorage.setItem('registro_usuarios_locales', JSON.stringify(usuariosConocidos));
+  }
+  const totalUsuarios = 50 + usuariosConocidos.length;
+
+  const elRecursos = document.getElementById('stat-recursos');
+  const elLibros = document.getElementById('stat-libros');
+  const elUsuarios = document.getElementById('stat-usuarios');
+
+  if (elRecursos) elRecursos.textContent = `+ ${totalRecursos}`;
+  if (elLibros) elLibros.textContent = `+ ${totalLibros}`;
+  if (elUsuarios) elUsuarios.textContent = `+ ${totalUsuarios}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(actualizarEstadisticasBarra, 500);
+});
