@@ -12,7 +12,6 @@
       padding: 0;
     }
 
-    /* ESTILOS DEL ENCABEZADO Y BANNER SUPERIOR */
     .top-header {
       background-color: #5b2c91;
       color: #ffffff;
@@ -31,9 +30,7 @@
       transition: opacity 0.2s ease;
     }
 
-    .logo-area-link:hover {
-      opacity: 0.9;
-    }
+    .logo-area-link:hover { opacity: 0.9; }
 
     .usac-title {
       font-size: 1.2rem;
@@ -41,34 +38,12 @@
       letter-spacing: 1px;
     }
 
-    .usac-title span {
-      color: #f39c12;
-    }
-
-    .fahusac-title {
-      font-size: 0.85rem;
-      color: #e0e0e0;
-    }
-
-    .header-right {
-      text-align: right;
-    }
-
-    .header-right h2 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .header-right h2 a {
-      color: #ffffff;
-      text-decoration: none;
-    }
-
-    .header-right p {
-      margin: 0;
-      font-size: 0.8rem;
-      color: #d1c4e9;
-    }
+    .usac-title span { color: #f39c12; }
+    .fahusac-title { font-size: 0.85rem; color: #e0e0e0; }
+    .header-right { text-align: right; }
+    .header-right h2 { margin: 0; font-size: 1.1rem; }
+    .header-right h2 a { color: #ffffff; text-decoration: none; }
+    .header-right p { margin: 0; font-size: 0.8rem; color: #d1c4e9; }
 
     .main-container {
       padding: 20px;
@@ -83,14 +58,12 @@
       margin-bottom: 20px;
     }
 
-    /* GRID DE 5 COLUMNAS X 10 FILAS (50 LIBROS) */
     .grid-5x10 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 20px;
     }
 
-    /* TARJETA DE LIBRO */
     .card-libro {
       background: #ffffff;
       border-radius: 12px;
@@ -102,16 +75,9 @@
       transition: transform 0.2s ease;
     }
 
-    .card-libro:hover {
-      transform: translateY(-5px);
-    }
-
-    .portada-placeholder {
-      background-color: #e0e0e0;
-      height: 180px;
-      position: relative;
-    }
-
+    .card-libro:hover { transform: translateY(-5px); }
+    .portada-placeholder { background-color: #e0e0e0; height: 180px; position: relative; }
+    
     .badge-pdf {
       position: absolute;
       bottom: 10px;
@@ -124,10 +90,7 @@
       border-radius: 4px;
     }
 
-    .info-libro {
-      padding: 15px;
-      text-align: center;
-    }
+    .info-libro { padding: 15px; text-align: center; }
 
     .titulo-libro {
       font-size: 1rem;
@@ -158,7 +121,6 @@
       text-decoration: none;
     }
 
-    /* ESTILOS DE PAGINACIÓN */
     .paginacion-container {
       display: flex;
       justify-content: center;
@@ -194,7 +156,6 @@
 </head>
 <body>
 
-  <!-- ENCABEZADO SUPERIOR / BANNER MENÚ (REDIRECCIONA A INDEX.HTML) -->
   <header class="top-header">
     <a href="index.html" class="logo-area-link" title="Volver al inicio">
       <div class="usac-title">USAC <span>TRICENTENARIA</span></div>
@@ -211,20 +172,28 @@
       <h2 style="color: #5b2c91;" id="lbl-pagina">Catálogo de Libros</h2>
     </div>
 
-    <!-- CONTENEDOR GRID 5X10 -->
-    <div id="contenedor-libros" class="grid-5x10"></div>
+    <!-- Contenedor con mensaje inicial de carga -->
+    <div id="contenedor-libros" class="grid-5x10">
+      <p style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">Cargando libros desde Google Sheets...</p>
+    </div>
 
-    <!-- BARRA DE PAGINACIÓN (UBICADA CORRECTAMENTE EN EL HTML) -->
     <div id="paginacion-bottom" class="paginacion-container"></div>
   </main>
 
-  <!-- ARCHIVOS JAVASCRIPT EXTERNOS -->
   <script src="cursos.js"></script>
   <script src="paginacion.js"></script>
-<!-- LÓGICA DE RENDERIZADO CORREGIDA -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // 1. Obtener el número de página de la URL (?pagina=1 por defecto)
+    // Espera inteligente a que la API de Google Sheets descargue los datos
+    window.addEventListener('DOMContentLoaded', () => {
+      const verificarCarga = setInterval(() => {
+        if (typeof BASE_CURSOS !== 'undefined' && Array.isArray(BASE_CURSOS) && BASE_CURSOS.length > 0) {
+          clearInterval(verificarCarga);
+          ejecutarCatalogoPaginado();
+        }
+      }, 100);
+    });
+
+    function ejecutarCatalogoPaginado() {
       const params = new URLSearchParams(window.location.search);
       const paginaActual = parseInt(params.get('pagina')) || 1;
       
@@ -233,17 +202,6 @@
         lblPagina.textContent = `Catálogo Completo - Página ${paginaActual}`;
       }
 
-      // 2. Validar que la base de datos de cursos.js exista
-      if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
-        console.error('Error: BASE_CURSOS no está cargada. Asegúrate de que cursos.js esté en la misma carpeta.');
-        const contenedor = document.getElementById('contenedor-libros');
-        if (contenedor) {
-          contenedor.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Error: No se pudieron cargar los libros desde cursos.js</p>';
-        }
-        return;
-      }
-
-      // 3. Calcular la porción de libros a mostrar (ej. 50 libros por página)
       const limitePorPagina = 50;
       const inicio = (paginaActual - 1) * limitePorPagina;
       const fin = inicio + limitePorPagina;
@@ -259,29 +217,30 @@
         return;
       }
 
-      // 4. Generar las tarjetas idénticas a la portada principal
       librosPagina.forEach(libro => {
         const card = document.createElement('div');
         card.className = 'card-libro';
 
-        const titulo = libro.nombre || libro.titulo || 'Sin título';
+        const titulo = libro.nombreLibro || libro.nombre || libro.titulo || 'Sin título';
         const autor = libro.autor || 'Cátedra Académica';
         const codigo = libro.id || libro.codigo || 'LIBRO';
         const formato = libro.modalidad || libro.formato || 'PDF';
         const enlace = libro.link || libro.enlace || '#';
 
-        // Verificar si existe imagen de portada, de lo contrario mostrar fondo morado con el código
-        const htmlPortada = libro.portada 
-          ? `<img src="${libro.portada}" alt="${titulo}" style="width: 100%; height: 180px; object-fit: contain; background: #f1f3f5; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-             <div style="display: none; height: 180px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold;">
-               ${codigo}
-             </div>`
-          : `<div style="display: flex; height: 180px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold;">
-               ${codigo}
-             </div>`;
+        let imgSrc = libro.portada || '';
+        if (imgSrc.includes('drive.google.com')) {
+          const matchId = imgSrc.match(/[-\w]{25,}/);
+          if (matchId) {
+            imgSrc = `https://lh3.googleusercontent.com/d/${matchId[0]}`;
+          }
+        }
+
+        const htmlPortada = imgSrc 
+          ? `<img src="${imgSrc}" alt="${titulo}" style="width: 100%; height: 180px; object-fit: cover; display: block;" onerror="this.style.display='none';">`
+          : `<div style="display: flex; height: 180px; background: #5b2c91; color: #fff; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold;">${codigo}</div>`;
 
         card.innerHTML = `
-          <div class="portada-placeholder" style="position: relative; height: 180px; overflow: hidden; background: #f1f3f5;">
+          <div class="portada-wrapper" style="position: relative; height: 180px; overflow: hidden; background: #f1f3f5;">
             ${htmlPortada}
             <span class="badge-pdf" style="z-index: 2; position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px;">
               ${formato.toUpperCase()}
@@ -300,30 +259,10 @@
         contenedor.appendChild(card);
       });
 
-      // 5. Generar la barra de paginación automáticamente
-      const totalPaginas = Math.ceil(BASE_CURSOS.length / limitePorPagina);
-      const paginacionContainer = document.getElementById('paginacion-bottom');
-
-      if (paginacionContainer && totalPaginas > 1) {
-        paginacionContainer.innerHTML = '';
-
-        for (let i = 1; i <= totalPaginas; i++) {
-          const enlace = document.createElement('a');
-          enlace.textContent = i;
-          enlace.href = `catalogo.html?pagina=${i}`;
-          enlace.className = `btn-pagina ${i === paginaActual ? 'activo' : ''}`;
-          paginacionContainer.appendChild(enlace);
-        }
-
-        if (paginaActual < totalPaginas) {
-          const btnSig = document.createElement('a');
-          btnSig.textContent = 'Página siguiente »';
-          btnSig.href = `catalogo.html?pagina=${paginaActual + 1}`;
-          btnSig.className = 'btn-siguiente';
-          paginacionContainer.appendChild(btnSig);
-        }
+      if (typeof renderizarPaginacion === 'function') {
+        renderizarPaginacion(BASE_CURSOS.length, paginaActual, 'paginacion-bottom', 'catalogo.html', false);
       }
-    });
+    }
   </script>
 </body>
 </html>
