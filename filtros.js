@@ -36,10 +36,7 @@ function actualizarOpcionesAsignatura() {
 
 // 2. FILTRADO PRINCIPAL
 function aplicarFiltrosMultiples() {
-  if (typeof BASE_CURSOS === 'undefined') {
-    console.error("BASE_CURSOS no está definido. Revisa que cursos.js cargue antes.");
-    return;
-  }
+  if (typeof BASE_CURSOS === 'undefined' || BASE_CURSOS.length === 0) return;
 
   const carrera = document.getElementById('select-carrera')?.value || 'todas';
   const ciclo = document.getElementById('select-ciclo')?.value || 'todos';
@@ -76,7 +73,7 @@ function obtenerIdCurso(curso) {
   return String(curso.id || curso.codigo || curso.codigo_curso || curso.tituloLibro || curso.nombreLibro || '').trim();
 }
 
-// 4. RENDERIZADO DE TARJETAS (Con persistencia correcta al recargar)
+// 4. RENDERIZADO DE TARJETAS
 function renderizarCursosResultantes(lista) {
   const contenedor = document.getElementById('grid-libros');
   if (!contenedor) return;
@@ -91,7 +88,6 @@ function renderizarCursosResultantes(lista) {
     return;
   }
 
-  // Obtener favoritos del usuario actual de manera segura
   let favoritosIds = [];
   if (typeof usuarioActual !== 'undefined' && usuarioActual && usuarioActual.uid) {
     favoritosIds = JSON.parse(localStorage.getItem(`favs_${usuarioActual.uid}`)) || [];
@@ -136,7 +132,6 @@ function renderizarCursosResultantes(lista) {
         <p class="autor" style="font-size: 0.82rem; color: #555; margin-bottom: 4px;"><strong>Curso:</strong> ${cursoAsociado}</p>
         <p class="autor" style="font-size: 0.85rem; color: #555; margin-bottom: 12px;">Por: ${curso.autor || 'Cátedra Académica'}</p>
         
-        <!-- Botones de Acción: Favorito y Descarga -->
         <div style="display: flex; gap: 8px;">
           <button class="btn-like ${esFav ? 'activo' : ''}" onclick="toggleFavorito('${idRecurso}', this)" style="flex: 1; background: ${esFav ? '#ffc107' : '#f0f0f0'}; color: ${esFav ? '#000' : '#333'}; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px;">
             <i class="fa-solid fa-star"></i> ${esFav ? 'Guardado' : 'Me gusta'}
@@ -221,7 +216,7 @@ window.registrarEnHistorial = function(idRecurso) {
   if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
 };
 
-// 8. RENDERIZAR FAVORITOS EN EL PERFIL
+// 8. RENDERIZAR FAVORITOS EN EL PERFIL (ESPERANDO A GOOGLE SHEETS)
 window.renderizarFavoritos = function() {
   const contenedor = document.getElementById('tab-content-favoritos');
   if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
@@ -233,13 +228,20 @@ window.renderizarFavoritos = function() {
     return;
   }
 
+  // Esperar a que BASE_CURSOS esté lleno antes de buscar
+  if (typeof BASE_CURSOS === 'undefined' || BASE_CURSOS.length === 0) {
+    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Cargando tus favoritos...</p>`;
+    setTimeout(window.renderizarFavoritos, 500); // Reintenta en medio segundo
+    return;
+  }
+
   const recursosFavoritos = BASE_CURSOS.filter(curso => {
     const idC = obtenerIdCurso(curso);
     return favoritosIds.includes(idC);
   });
 
   if (recursosFavoritos.length === 0) {
-    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">No se encontraron los detalles de los recursos favoritos.</p>`;
+    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;">No se encontraron los detalles de los recursos favoritos. Es posible que el libro haya sido eliminado de la biblioteca.</p>`;
     return;
   }
 
@@ -295,7 +297,7 @@ window.renderizarFavoritos = function() {
   });
 };
 
-// 9. RENDERIZAR HISTORIAL EN EL PERFIL
+// 9. RENDERIZAR HISTORIAL EN EL PERFIL (ESPERANDO A GOOGLE SHEETS)
 window.renderizarHistorial = function() {
   const contenedor = document.getElementById('tab-content-historial');
   if (!contenedor || typeof usuarioActual === 'undefined' || !usuarioActual) return;
@@ -307,12 +309,19 @@ window.renderizarHistorial = function() {
     return;
   }
 
+  // Esperar a que BASE_CURSOS esté lleno antes de buscar
+  if (typeof BASE_CURSOS === 'undefined' || BASE_CURSOS.length === 0) {
+    contenedor.innerHTML = `<p style="padding: 30px; text-align: center; color: #666;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Cargando tu historial...</p>`;
+    setTimeout(window.renderizarHistorial, 500); // Reintenta en medio segundo
+    return;
+  }
+
   contenedor.innerHTML = `<div style="display: flex; flex-direction: column; gap: 10px; padding: 20px;"></div>`;
   const subList = contenedor.querySelector('div');
 
   historial.forEach(reg => {
     const cursoEncontrado = BASE_CURSOS.find(c => obtenerIdCurso(c) === String(reg.id).trim());
-    const titulo = cursoEncontrado ? (cursoEncontrado.nombreLibro || cursoEncontrado.tituloLibro || cursoEncontrado.nombre) : 'Recurso Descargado';
+    const titulo = cursoEncontrado ? (cursoEncontrado.nombreLibro || cursoEncontrado.tituloLibro || cursoEncontrado.nombre) : 'Recurso Descargado (Detalles no encontrados)';
     
     const item = document.createElement('div');
     item.style.cssText = "background: #f9f9f9; padding: 12px; border: 1px solid #eee; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;";
@@ -327,7 +336,7 @@ window.renderizarHistorial = function() {
   });
 };
 
-// 10. INICIALIZACIÓN GENERAL Y ESPERA DE SESIÓN PARA PERSISTENCIA
+// 10. INICIALIZACIÓN GENERAL
 document.addEventListener('DOMContentLoaded', () => {
   const selectCarrera = document.getElementById('select-carrera');
   const selectCiclo = document.getElementById('select-ciclo');
@@ -351,14 +360,14 @@ document.addEventListener('DOMContentLoaded', () => {
     selectAsignatura.addEventListener('change', aplicarFiltrosMultiples);
   }
 
-  actualizarOpcionesAsignatura();
-  aplicarFiltrosMultiples();
-
-  // Sincronizar estado de sesión para asegurar que los favoritos se pinten bien al recargar
-  const verificarSesion = setInterval(() => {
-    if (typeof usuarioActual !== 'undefined') {
-      clearInterval(verificarSesion);
+  // Revisar constantemente hasta que exista el usuario Y la base de datos haya cargado desde Google
+  const verificarCarga = setInterval(() => {
+    if (typeof usuarioActual !== 'undefined' && typeof BASE_CURSOS !== 'undefined' && BASE_CURSOS.length > 0) {
+      clearInterval(verificarCarga);
+      
+      actualizarOpcionesAsignatura();
       aplicarFiltrosMultiples();
+      
       if (usuarioActual) {
         if (typeof window.renderizarFavoritos === 'function') window.renderizarFavoritos();
         if (typeof window.renderizarHistorial === 'function') window.renderizarHistorial();
