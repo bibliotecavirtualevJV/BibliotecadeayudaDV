@@ -304,9 +304,13 @@ window.renderizarHistorial = function() {
     subList.appendChild(item);
   });
 };
-// 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA
+// 7. ESTADÍSTICAS DINÁMICAS DE LA BARRA (Con reintento automático)
 function actualizarEstadisticasBarra() {
-  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) return;
+  if (typeof BASE_CURSOS === 'undefined' || !Array.isArray(BASE_CURSOS)) {
+    // Si la base aún no carga, vuelve a intentarlo en medio segundo
+    setTimeout(actualizarEstadisticasBarra, 500);
+    return;
+  }
 
   const totalRecursos = BASE_CURSOS.length;
 
@@ -332,38 +336,7 @@ function actualizarEstadisticasBarra() {
   if (elUsuarios) elUsuarios.textContent = `+ ${totalUsuarios}`;
 }
 
-// 8. INICIALIZACIÓN GENERAL
+// Ejecutar al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-  const selectCarrera = document.getElementById('select-carrera');
-  const selectCiclo = document.getElementById('select-ciclo');
-  const selectAsignatura = document.getElementById('select-asignatura');
-
-  if (selectCarrera) {
-    selectCarrera.addEventListener('change', () => {
-      actualizarOpcionesAsignatura();
-      aplicarFiltrosMultiples();
-    });
-  }
-
-  if (selectCiclo) {
-    selectCiclo.addEventListener('change', () => {
-      actualizarOpcionesAsignatura();
-      aplicarFiltrosMultiples();
-    });
-  }
-
-  if (selectAsignatura) {
-    selectAsignatura.addEventListener('change', aplicarFiltrosMultiples);
-  }
-
-  actualizarOpcionesAsignatura();
-  aplicarFiltrosMultiples();
-
-  setTimeout(() => {
-    if (typeof usuarioActual !== 'undefined' && usuarioActual) {
-      window.renderizarFavoritos();
-      window.renderizarHistorial();
-    }
-    actualizarEstadisticasBarra();
-  }, 600);
+  actualizarEstadisticasBarra();
 });
